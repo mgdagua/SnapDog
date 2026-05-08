@@ -1,6 +1,4 @@
 import { IonContent, IonPage } from '@ionic/react'
-import { useLocation } from 'react-router-dom'
-// Usamos los datos de ella para asegurar que cargue
 import { mockPosts } from '../../lib/mock-data' 
 import { PostCard } from '../../components/feed/post-card'
 import { Header } from '../../components/feed/header'
@@ -10,10 +8,6 @@ import { QuickStats } from '../../components/feed/quick-stats'
 import { ReportButton } from '../../components/feed/report-button'
 
 export default function VolunteerDashboard() {
-  const location = useLocation<{ role: string }>()
-  // Forzamos a que si no hay rol, asuma voluntario
-  const isVolunteer = location.state?.role !== 'veterinarian'
-
   return (
     <IonPage>
       <Header />
@@ -24,7 +18,6 @@ export default function VolunteerDashboard() {
 
           <main className="max-w-2xl mx-auto px-4 py-4 pb-24">
             <div className="flex flex-col gap-4">
-              {/* Usamos mockPosts directamente para evitar errores de undefined */}
               {mockPosts.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
@@ -33,8 +26,8 @@ export default function VolunteerDashboard() {
         </div>
       </IonContent>
       
-      {/* El botón siempre visible para ti como voluntario */}
-      {isVolunteer && <ReportButton />}
+      {/* Botón de reporte para el voluntario */}
+      <ReportButton />
       
       <BottomNav />
     </IonPage>

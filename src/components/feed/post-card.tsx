@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Heart, MessageCircle, Share2, MapPin, Clock, MoreHorizontal, Bookmark, Shield } from 'lucide-react'
+// ¡Cambiamos Footprints por PawPrint!
+import { PawPrint, MessageCircle, Share2, MapPin, Clock, MoreHorizontal, Bookmark, Shield } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Card, CardContent } from '../../components/ui/card'
 import { Button } from '../../components/ui/button'
@@ -111,7 +112,7 @@ export function PostCard({ post }: PostCardProps) {
 
         {/* Interaction Stats */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-          <span>{likesCount} me gusta</span>
+          <span>{likesCount} apoyos</span>
           <span>{post.comments} comentarios</span>
           <span>{post.shares} compartidos</span>
         </div>
@@ -125,11 +126,12 @@ export function PostCard({ post }: PostCardProps) {
               onClick={handleLike}
               className={cn(
                 'gap-2 transition-all duration-200',
-                isLiked && 'text-destructive hover:text-destructive'
+                isLiked && 'text-primary hover:text-primary'
               )}
             >
-              <Heart className={cn('h-5 w-5', isLiked && 'fill-current')} />
-              <span className="text-sm">Me gusta</span>
+              {/* Aquí usamos la huella de perro de verdad */}
+              <PawPrint className={cn('h-5 w-5', isLiked && 'fill-current')} />
+              <span className="text-sm font-medium">Apoyar</span>
             </Button>
             <Button variant="ghost" size="sm" className="gap-2">
               <MessageCircle className="h-5 w-5" />
