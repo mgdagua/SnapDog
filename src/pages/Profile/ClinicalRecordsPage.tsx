@@ -149,7 +149,7 @@ export default function ClinicalRecordsPage() {
                 </IonButtons>
                 <div>
                   <h1 className="text-2xl font-black tracking-tight text-foreground">
-                    {isHistoryView ? 'Historial de Éxitos' : 'Mis Pacientes'}
+                    {isHistoryView ? 'Historial de Rescates' : 'Mis Pacientes'}
                   </h1>
                   <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">
                     {currentUser.veterinaryCenter}

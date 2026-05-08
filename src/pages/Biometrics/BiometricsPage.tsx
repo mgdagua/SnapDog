@@ -1,4 +1,4 @@
-import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon, IonInput, IonModal, IonTextarea } from '@ionic/react'
+import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon, IonInput, IonModal, IonTextarea, useIonViewWillEnter } from '@ionic/react'
 import { shieldCheckmarkOutline, cameraOutline, closeOutline, searchOutline, alertCircleOutline, addCircleOutline, clipboardOutline, timeOutline, addOutline, chevronBackOutline, trendingUpOutline, medalOutline, starOutline, locationOutline, medicalOutline, informationCircleOutline, heartOutline, checkmarkCircleOutline } from 'ionicons/icons'
 import { useState, useRef, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
@@ -14,8 +14,10 @@ export default function BiometricsPage() {
   const [searchCode, setSearchCode] = useState('')
   const [scanResult, setScanResult] = useState<'found' | 'not_found' | null>(null)
   const [newAnimal, setNewAnimal] = useState({ name: '', breed: '', age: '', weight: '' })
+  const [animalPhoto, setAnimalPhoto] = useState<string | null>(null)
   const [generatedId, setGeneratedId] = useState('')
   const [showBonus, setShowBonus] = useState(false)
+  const [isNewAnimal, setIsNewAnimal] = useState(false)
   
   // Estados para Registro
   const [isNearVeterinary, setIsNearVeterinary] = useState(false)
@@ -29,6 +31,11 @@ export default function BiometricsPage() {
   const history = useHistory()
   const userRole = localStorage.getItem('userRole') || 'volunteer'
   const isVolunteer = userRole === 'volunteer'
+
+  // Resetear estado al entrar (Requerimiento de no guardar historial de interacción)
+  useIonViewWillEnter(() => {
+    resetFlow()
+  })
 
   const checkLocation = () => {
     setIsCheckingLocation(true)
@@ -82,9 +89,19 @@ export default function BiometricsPage() {
   const simulateScan = () => {
     setTimeout(() => {
       stopCamera()
+      // Simulamos que el escaneo facial siempre encuentra a Max para propósitos de la demo
+      setGeneratedId('SD-123456')
+      setNewAnimal({ 
+        name: 'Max', 
+        breed: 'Labrador Mestizo', 
+        age: '3 años', 
+        weight: '12.5' 
+      })
+      setIsNewAnimal(false)
       setScanResult('found')
       setFlow('result')
       setShowBonus(true)
+      setIsClinicalStatus(true)
     }, 3500)
   }
 
@@ -95,14 +112,16 @@ export default function BiometricsPage() {
     }
     const uid = `SD-${Date.now().toString().slice(-4)}-${Math.floor(Math.random() * 9000 + 1000)}`
     setGeneratedId(uid)
+    setIsNewAnimal(true)
     setFlow('result')
     setScanResult('found')
     setShowBonus(true)
-    setIsClinicalStatus(true) // Al registrar en veterinaria, entra en estado clínico
+    setIsClinicalStatus(true)
   }
 
   const resetFlow = () => {
     setNewAnimal({ name: '', breed: '', age: '', weight: '' })
+    setAnimalPhoto(null)
     setSearchCode('')
     setGeneratedId('')
     setScanResult(null)
@@ -110,26 +129,39 @@ export default function BiometricsPage() {
     setClinicalPhoto(null)
     setIsNearVeterinary(false)
     setIsClinicalStatus(false)
+    setIsNewAnimal(false)
   }
 
   const handleSearch = () => {
-    setGeneratedId(searchCode || 'SD-123456')
+    // REQUERIMIENTO: Solo SD-123456 es correcto para voluntarios
+    if (isVolunteer && searchCode.toLowerCase() !== 'sd-123456') {
+      setScanResult('not_found')
+      return
+    }
+
+    setGeneratedId('SD-123456')
     setNewAnimal({ 
-      name: searchCode === 'SD-123456' ? 'Max' : 'Paciente Detectado', 
+      name: 'Max', 
       breed: 'Labrador Mestizo', 
       age: '3 años', 
       weight: '12.5' 
     })
+    setIsNewAnimal(false)
     setScanResult('found')
     setFlow('result')
     setShowBonus(true)
-    // Para la demo, si es Max ya está en estado clínico
-    if (searchCode === 'SD-123456') setIsClinicalStatus(true)
+    setIsClinicalStatus(true)
   }
 
   const takeClinicalPhoto = () => {
     setClinicalPhoto("https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=400&h=300&fit=crop")
     alert("Foto clínica adjuntada con éxito.")
+  }
+
+  const handlePickPhoto = () => {
+    // Simulación de selección de foto
+    setAnimalPhoto("https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=400&fit=crop")
+    alert("Foto del animal seleccionada con éxito.")
   }
 
   return (
@@ -173,13 +205,13 @@ export default function BiometricsPage() {
                   <div className="flex-1 h-px bg-border" />
                 </div>
 
-                <div className="flex gap-2 mb-6">
+                <div className="flex gap-2">
                   <div className="flex-1 bg-background rounded-2xl border-2 border-border/60 px-4 flex items-center gap-3">
                     <IonIcon icon={searchOutline} className="text-muted-foreground" />
                     <IonInput 
                       placeholder="Ej: SD-123456" 
                       value={searchCode}
-                      onIonInput={e => setSearchCode(e.detail.value!)}
+                      onIonInput={e => { setSearchCode(e.detail.value!); setScanResult(null); }}
                       className="font-mono font-bold text-sm"
                     />
                   </div>
@@ -188,16 +220,26 @@ export default function BiometricsPage() {
                   </Button>
                 </div>
 
-                <div className="flex flex-col gap-4">
-                  <Button 
-                    onClick={() => setFlow('registering')} 
-                    variant="outline" 
-                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] border-2"
-                  >
-                    <IonIcon icon={addCircleOutline} className="text-lg mr-2" />
-                    Registrar Nuevo Animal
-                  </Button>
-                </div>
+                {/* Mensaje de Error y Botón de Registro Condicional */}
+                {isVolunteer && scanResult === 'not_found' && (
+                  <div className="mt-6 animate-in slide-in-from-top-4 duration-300">
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-4 flex flex-col items-center text-center gap-3">
+                      <div className="flex items-center gap-2 text-destructive">
+                        <IonIcon icon={alertCircleOutline} className="text-xl" />
+                        <p className="text-xs font-black uppercase tracking-tight">ID Incorrecto / No encontrado</p>
+                      </div>
+                      <p className="text-[11px] font-bold text-destructive/80 leading-tight">
+                        Este código no coincide con ningún registro activo. Por favor, registre el animal para iniciar su historial.
+                      </p>
+                      <Button 
+                        onClick={() => setFlow('registering')} 
+                        className="w-full h-12 rounded-xl bg-destructive text-destructive-foreground font-black uppercase text-[10px] tracking-widest mt-1"
+                      >
+                        Registrar Nuevo Animal
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </Card>
             </div>
           )}
@@ -232,6 +274,22 @@ export default function BiometricsPage() {
 
                   {isNearVeterinary && (
                     <div className="animate-in fade-in slide-in-from-top-4 duration-500 space-y-4">
+                      <div className="flex flex-col items-center gap-4 mb-6">
+                        <div 
+                          onClick={handlePickPhoto}
+                          className="w-32 h-32 rounded-[32px] bg-muted border-2 border-dashed border-primary/30 flex flex-col items-center justify-center overflow-hidden cursor-pointer group hover:bg-primary/5 transition-colors"
+                        >
+                          {animalPhoto ? (
+                            <img src={animalPhoto} className="w-full h-full object-cover" alt="Animal" />
+                          ) : (
+                            <>
+                              <IonIcon icon={cameraOutline} className="text-3xl text-primary/40 group-hover:scale-110 transition-transform" />
+                              <span className="text-[8px] font-black uppercase text-primary/40 mt-1">Añadir Foto</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
                       <div className="bg-primary/5 rounded-[24px] p-4 border border-primary/10">
                         <div className="flex items-start gap-3">
                           <IonIcon icon={informationCircleOutline} className="text-primary text-xl mt-0.5" />
@@ -303,73 +361,88 @@ export default function BiometricsPage() {
                 <div className="flex items-center gap-4 relative z-10">
                   <div className="h-20 w-20 rounded-[28px] border-2 border-white shadow-xl overflow-hidden bg-muted">
                     <img 
-                      src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=200&h=200&fit=crop" 
+                      src={isNewAnimal ? (animalPhoto || "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=200&h=200&fit=crop") : "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=200&h=200&fit=crop"} 
                       className="w-full h-full object-cover" 
                       alt="Paciente" 
                     />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Escaneo Exitoso</p>
-                    <h3 className="text-2xl font-black text-foreground leading-tight">{newAnimal.name || 'Max'}</h3>
+                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{isNewAnimal ? 'Registro Exitoso' : 'Escaneo Exitoso'}</p>
+                    <h3 className="text-2xl font-black text-foreground leading-tight">{newAnimal.name || 'Sin Nombre'}</h3>
                     <p className="text-xs font-mono font-bold text-muted-foreground">{generatedId || 'SD-123456'}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-2 mt-4 relative z-10">
-                  <Badge variant="secondary" className="bg-white/50 text-[9px] font-black uppercase">{newAnimal.breed || 'Labrador Mestizo'}</Badge>
-                  <Badge variant="secondary" className="bg-white/50 text-[9px] font-black uppercase">{newAnimal.age || '3 años'}</Badge>
+                  <Badge variant="secondary" className="bg-white/50 text-[9px] font-black uppercase">{newAnimal.breed || 'Raza no especificada'}</Badge>
+                  <Badge variant="secondary" className="bg-white/50 text-[9px] font-black uppercase">{newAnimal.age || 'Edad no especificada'}</Badge>
                 </div>
               </Card>
 
-              {/* SECCIÓN CONDICIONAL SEGÚN ROL */}
+              {/* SECCIÓN CONDICIONAL SEGÚN ROL Y TIPO DE REGISTRO */}
               {isVolunteer ? (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <div className="flex items-center gap-2 px-2">
-                    <IonIcon icon={medicalOutline} className="text-primary" />
-                    <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Hoja de Cuidados (Veterinaria)</h4>
-                  </div>
-                  
-                  <Card className="p-6 rounded-[32px] border-none shadow-sm bg-background border border-border/40 space-y-6">
-                    {/* Enfermedad / Diagnóstico */}
-                    <div>
-                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-2">Diagnóstico Previo</p>
-                      <div className="flex items-center gap-2 text-destructive">
-                        <IonIcon icon={alertCircleOutline} />
-                        <span className="text-xs font-black uppercase tracking-tight">Desnutrición Severa / Parásitos</span>
-                      </div>
+                /* Si es un animal NUEVO, no mostramos la Hoja de Cuidados */
+                !isNewAnimal ? (
+                  <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="flex items-center gap-2 px-2">
+                      <IonIcon icon={medicalOutline} className="text-primary" />
+                      <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Hoja de Cuidados (Veterinaria)</h4>
                     </div>
+                    
+                    <Card className="p-6 rounded-[32px] border-none shadow-sm bg-background border border-border/40 space-y-6">
+                      {/* Enfermedad / Diagnóstico */}
+                      <div>
+                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-2">Diagnóstico Previo</p>
+                        <div className="flex items-center gap-2 text-destructive">
+                          <IonIcon icon={alertCircleOutline} />
+                          <span className="text-xs font-black uppercase tracking-tight">Desnutrición Severa / Parásitos</span>
+                        </div>
+                      </div>
 
-                    {/* Recomendaciones */}
-                    <div>
-                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-2">Pautas de Cuidado</p>
-                      <p className="text-xs font-bold text-foreground/80 leading-relaxed italic">
-                        "Proporcionar dieta hipercalórica 3 veces al día. Asegurar acceso a agua fresca. Mantener en reposo y evitar sol directo."
+                      {/* Recomendaciones */}
+                      <div>
+                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-2">Pautas de Cuidado</p>
+                        <p className="text-xs font-bold text-foreground/80 leading-relaxed italic">
+                          "Proporcionar dieta hipercalórica 3 veces al día. Asegurar acceso a agua fresca. Mantener en reposo y evitar sol directo."
+                        </p>
+                      </div>
+
+                      {/* Medicación */}
+                      <div>
+                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-2">Medicación</p>
+                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                          <div className="flex items-center gap-2 mb-1">
+                            <IonIcon icon={heartOutline} className="text-primary text-xs" />
+                            <p className="text-[11px] font-black text-primary">Vitamina B12 + Desparasitante</p>
+                          </div>
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">1 dosis cada 24 horas vía oral</p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    <div className="bg-primary/5 rounded-[24px] p-4 border border-primary/10">
+                      <div className="flex items-center gap-3 mb-2">
+                        <IonIcon icon={shieldCheckmarkOutline} className="text-primary" />
+                        <p className="text-[10px] font-black uppercase text-primary tracking-widest">Aviso de Seguridad</p>
+                      </div>
+                      <p className="text-[10px] font-medium text-muted-foreground leading-tight italic">
+                        Como voluntario, tu misión es seguir estas indicaciones. No suministres medicamentos no listados ni modifiques la dieta sin previa autorización veterinaria.
                       </p>
                     </div>
-
-                    {/* Medicación */}
-                    <div>
-                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-2">Medicación</p>
-                      <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
-                        <div className="flex items-center gap-2 mb-1">
-                          <IonIcon icon={heartOutline} className="text-primary text-xs" />
-                          <p className="text-[11px] font-black text-primary">Vitamina B12 + Desparasitante</p>
-                        </div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">1 dosis cada 24 horas vía oral</p>
-                      </div>
-                    </div>
-                  </Card>
-
-                  <div className="bg-primary/5 rounded-[24px] p-4 border border-primary/10">
-                    <div className="flex items-center gap-3 mb-2">
-                      <IonIcon icon={shieldCheckmarkOutline} className="text-primary" />
-                      <p className="text-[10px] font-black uppercase text-primary tracking-widest">Aviso de Seguridad</p>
-                    </div>
-                    <p className="text-[10px] font-medium text-muted-foreground leading-tight italic">
-                      Como voluntario, tu misión es seguir estas indicaciones. No suministres medicamentos no listados ni modifiques la dieta sin previa autorización veterinaria.
-                    </p>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-4 animate-in fade-in duration-500">
+                    <div className="bg-emerald-500/5 rounded-[32px] p-6 border border-emerald-500/10 flex flex-col items-center text-center gap-3">
+                      <div className="bg-emerald-500/20 p-4 rounded-full">
+                        <IonIcon icon={checkmarkCircleOutline} className="text-4xl text-emerald-600" />
+                      </div>
+                      <h4 className="text-lg font-black text-foreground">Animal Registrado</h4>
+                      <p className="text-xs font-bold text-muted-foreground leading-relaxed">
+                        Has iniciado el historial médico de <span className="text-primary font-black uppercase">{newAnimal.name || 'este paciente'}</span>. Ahora la red veterinaria de SnapDog podrá realizar el seguimiento clínico.
+                      </p>
+                    </div>
+                  </div>
+                )
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between px-2">
