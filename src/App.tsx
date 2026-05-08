@@ -1,7 +1,7 @@
 import React from 'react'
 import { IonReactRouter } from '@ionic/react-router'
 import { IonRouterOutlet, IonSplitPane } from '@ionic/react'
-import { Route, Redirect } from 'react-router-dom' // Añadimos Redirect
+import { Route } from 'react-router-dom'
 import { SideMenu } from './components/menu/SideMenu'
 import VetDashboard from './pages/Veterinarian/VetDashboard'
 import MapPage from './pages/Map/MapPage'
@@ -11,6 +11,7 @@ import ProfilePage from './pages/Profile/ProfilePage'
 import ClinicalRecordsPage from './pages/Profile/ClinicalRecordsPage'
 import LoginPage from './pages/Login/LoginPage'
 import VolunteerDashboard from './pages/Volunteer/VolunteerDashboard'
+import ReportPage from './pages/Report/ReportPage'
 
 /* Core CSS */
 import '@ionic/react/css/core.css'
@@ -35,41 +36,22 @@ const App: React.FC = () => (
           <LoginPage />
         </Route>
         
-        {/* Ruteador Inteligente en línea. ¡Esto no falla! */}
         <Route exact path="/home" render={() => {
           const role = localStorage.getItem('userRole')
-          if (role === 'veterinarian') {
-            return <VetDashboard />
-          }
-          return <VolunteerDashboard />
+          return role === 'veterinarian' ? <VetDashboard /> : <VolunteerDashboard />
         }} />
         
-        <Route exact path="/map">
-          <MapPage />
+        <Route exact path="/report">
+          <ReportPage />
         </Route>
-        <Route exact path="/ranking">
-          <RankingPage />
-        </Route>
-        <Route exact path="/biometrics">
-          <BiometricsPage />
-        </Route>
-        <Route exact path="/profile">
-          <ProfilePage />
-        </Route>
-        <Route exact path="/clinical-records">
-          <ClinicalRecordsPage />
-        </Route>
-        
-        <Route exact path="/volunteer">
-          <VolunteerDashboard />
-        </Route>
-        
-        <Route exact path="/network">
-          <ClinicalRecordsPage />
-        </Route>
-        <Route exact path="/active-patients">
-          <ClinicalRecordsPage />
-        </Route>
+
+        <Route exact path="/map" component={MapPage} />
+        <Route exact path="/ranking" component={RankingPage} />
+        <Route exact path="/biometrics" component={BiometricsPage} />
+        <Route exact path="/profile" component={ProfilePage} />
+        <Route exact path="/clinical-records" component={ClinicalRecordsPage} />
+        <Route exact path="/network" component={ClinicalRecordsPage} />
+        <Route exact path="/active-patients" component={ClinicalRecordsPage} />
       </IonRouterOutlet>
     </IonSplitPane>
   </IonReactRouter>

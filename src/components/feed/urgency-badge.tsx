@@ -1,16 +1,16 @@
-import { cn } from '@/lib/utils'
-import type { UrgencyLevel } from '@/lib/types'
+import { cn } from '../../lib/utils' // Ajusta la ruta si usas alias @
+import type { UrgencyLevel } from '../../lib/types'
 import { AlertTriangle, AlertCircle, Clock, CheckCircle } from 'lucide-react'
 
 interface UrgencyBadgeProps {
-  level: UrgencyLevel
+  level: UrgencyLevel | string // Permitimos string genérico por si falla el tipado
   showLabel?: boolean
   className?: string
 }
 
-const urgencyConfig = {
+const urgencyConfig: Record<string, any> = {
   critical: {
-    label: 'Critico',
+    label: 'Crítico',
     icon: AlertTriangle,
     className: 'bg-destructive/15 text-destructive border-destructive/30 animate-pulse',
   },
@@ -32,7 +32,8 @@ const urgencyConfig = {
 }
 
 export function UrgencyBadge({ level, showLabel = true, className }: UrgencyBadgeProps) {
-  const config = urgencyConfig[level]
+  // 🛡️ MAGIA AQUÍ: Si el nivel no existe en el objeto, usamos 'low' por defecto
+  const config = urgencyConfig[level] || urgencyConfig['low']
   const Icon = config.icon
 
   return (
