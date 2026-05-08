@@ -1,14 +1,89 @@
 import type { AnimalPost, User } from './types'
 
 export const currentUser: User = {
-  id: '1',
-  name: 'Maria Garcia',
-  avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
-  role: 'volunteer',
-  points: 1250,
-  level: 5,
-  badges: ['first_rescue', 'community_helper', 'weekly_active'],
+  id: 'vet_1',
+  name: 'Dra. Ana Rodriguez',
+  avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face',
+  role: 'veterinarian',
+  points: 2500,
+  level: 12,
+  badges: ['expert_surgeon', 'community_hero', 'top_vet'],
+  veterinaryCenter: 'Clínica San Roque'
 }
+
+export const mockPatients = [
+  { 
+    id: 'SD-123456', 
+    name: 'Max', 
+    entity: 'Clínica San Roque', 
+    status: 'En tratamiento', 
+    lastUpdate: '2h ago', 
+    level: 'high', 
+    diagnosis: 'Desnutrición severa', 
+    notes: 'Paciente rescatado en Parque Caldas.', 
+    type: 'dog',
+    image: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=200&h=200&fit=crop',
+    weight: '12.5',
+    temperature: '38.2',
+    heartRate: '95',
+    breed: 'Labrador Mestizo',
+    age: '3 años',
+    recommendations: 'Dieta hipercalórica controlada. Evitar ejercicio brusco.',
+    medications: [{ name: 'Complejo B', dosage: '2ml', frequency: 'c/24h' }]
+  },
+  { 
+    id: 'SD-852114', 
+    name: 'Luna', 
+    entity: 'Clínica San Roque', 
+    status: 'Recuperación', 
+    lastUpdate: '1d ago', 
+    level: 'medium', 
+    diagnosis: 'Fractura en pata', 
+    notes: 'Evolucionando bien post-cirugía.', 
+    type: 'dog',
+    image: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=200&h=200&fit=crop',
+    weight: '8.2',
+    temperature: '38.5',
+    heartRate: '110',
+    breed: 'Beagle',
+    age: '2 años',
+    recommendations: 'Reposo absoluto. Control de inflamación.',
+    medications: [{ name: 'Meloxicam', dosage: '0.5ml', frequency: 'c/12h' }]
+  },
+  { 
+    id: 'SD-998877', 
+    name: 'Misi', 
+    entity: 'Clínica San Roque', 
+    status: 'Observación', 
+    lastUpdate: '3h ago', 
+    level: 'low', 
+    diagnosis: 'Gripe felina', 
+    notes: 'Iniciando antibióticos.', 
+    type: 'cat',
+    image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200&h=200&fit=crop',
+    weight: '3.1',
+    temperature: '39.1',
+    heartRate: '140',
+    breed: 'Persa Mestizo',
+    age: '1 año',
+    recommendations: 'Mantener hidratada y en lugar cálido.',
+    medications: [{ name: 'Amoxicilina', dosage: '1.2ml', frequency: 'c/12h' }]
+  },
+  { 
+    id: 'SD-445566', 
+    name: 'Toby', 
+    entity: 'Fundación Huellitas', 
+    status: 'Sano', 
+    lastUpdate: '5d ago', 
+    level: 'low', 
+    diagnosis: 'Chequeo general', 
+    notes: 'Listo para adopción.', 
+    type: 'dog',
+    image: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200&h=200&fit=crop',
+    breed: 'Criollo',
+    age: '4 años'
+  },
+]
 
 export const mockPosts: AnimalPost[] = [
   {

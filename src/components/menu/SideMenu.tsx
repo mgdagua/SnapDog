@@ -30,7 +30,6 @@ const menuItems = [
 const toolItems = [
   { title: 'Escáner Biométrico', url: '/biometrics', icon: scanOutline, roles: ['volunteer', 'veterinarian'] },
   { title: 'Pacientes Activos', url: '/active-patients', icon: clipboardOutline, roles: ['veterinarian'] },
-  { title: 'Historias Clínicas', url: '/clinical-records', icon: medicalOutline, roles: ['veterinarian'] },
 ]
 
 export function SideMenu() {

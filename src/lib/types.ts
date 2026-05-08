@@ -67,4 +67,5 @@ export interface User {
   points: number
   level: number
   badges: string[]
+  veterinaryCenter?: string
 }

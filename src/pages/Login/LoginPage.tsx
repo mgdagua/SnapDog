@@ -68,7 +68,7 @@ export default function LoginPage() {
               />
             </div>
             <p className="text-[14px] font-black text-primary uppercase tracking-[0.4em] text-center opacity-90">
-              SnapDog, donde cada Snap deja huella
+              Donde cada Snap deja Huella
             </p>
           </div>
 
