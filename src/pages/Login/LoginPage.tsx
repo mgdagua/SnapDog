@@ -28,7 +28,7 @@ export default function LoginPage() {
         avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face'
       },
       veterinarian: {
-        email: 'veterinario@snapdog.com',
+        email: '123',
         password: '123',
         name: 'Dra. María García',
         avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face'
