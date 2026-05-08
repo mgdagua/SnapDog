@@ -30,8 +30,8 @@ export default function LoginPage() {
       veterinarian: {
         email: 'veterinario@snapdog.com',
         password: '123',
-        name: 'Dr. Pedro Gómez',
-        avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face'
+        name: 'Dra. María García',
+        avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face'
       }
     }
 

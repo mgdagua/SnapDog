@@ -17,6 +17,7 @@ import {
   settingsOutline,
   scanOutline,
   clipboardOutline,
+  folderOpenOutline,
 } from 'ionicons/icons'
 import { useLocation } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
@@ -24,12 +25,13 @@ import { currentUser } from '../../lib/mock-data'
 
 const menuItems = [
   { title: 'Inicio', url: '/home', icon: homeOutline, roles: ['volunteer', 'veterinarian'] },
-  { title: 'Reportar', url: '/report', icon: cameraOutline, roles: ['volunteer'] },
+  { title: 'Snap', url: '/report', icon: cameraOutline, roles: ['volunteer'] },
 ]
 
 const toolItems = [
   { title: 'Escáner Biométrico', url: '/biometrics', icon: scanOutline, roles: ['volunteer', 'veterinarian'] },
   { title: 'Pacientes Activos', url: '/active-patients', icon: clipboardOutline, roles: ['veterinarian'] },
+  { title: 'Historial de Rescates', url: '/history', icon: folderOpenOutline, roles: ['veterinarian'] },
 ]
 
 export function SideMenu() {

@@ -24,6 +24,24 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon
 
+import { useState, useEffect } from 'react'
+
+const mapStyles = `
+  .leaflet-container {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 24px;
+    z-index: 1;
+  }
+  .leaflet-control-container .leaflet-top,
+  .leaflet-control-container .leaflet-bottom {
+    z-index: 400 !important;
+  }
+  .leaflet-pane {
+    z-index: 1 !important;
+  }
+`;
+
 const getMarkerIcon = (urgency: string) => {
   const color = urgency === 'critical' ? '#ef4444' : urgency === 'high' ? '#f59e0b' : '#8E67B5'
   return L.divIcon({
@@ -57,6 +75,15 @@ export default function MapPage() {
   const activeCases = mockPosts.filter(
     (post) => ['needs_rescue', 'in_treatment', 'recovering'].includes(post.status) && post.coordinates
   )
+
+  useEffect(() => {
+    const styleTag = document.createElement('style');
+    styleTag.innerHTML = mapStyles;
+    document.head.appendChild(styleTag);
+    return () => {
+      document.head.removeChild(styleTag);
+    };
+  }, []);
 
   return (
     <IonPage>

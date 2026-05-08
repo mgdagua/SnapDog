@@ -5,6 +5,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { currentUser } from '@/lib/mock-data'
 
 export function Header() {
+  const userName = localStorage.getItem('userName') || currentUser.name
+  const userAvatar = localStorage.getItem('userAvatar') || currentUser.avatar
+
   return (
     <IonHeader className="ion-no-border">
       <IonToolbar className="--background: transparent; --padding-top: 0; --padding-bottom: 0;">
@@ -29,8 +32,8 @@ export function Header() {
                 <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
               </Button>
               <Avatar className="h-8 w-8 ring-2 ring-primary/20">
-                <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-                <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={userAvatar} alt={userName} />
+                <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
               </Avatar>
             </div>
           </div>

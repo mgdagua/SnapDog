@@ -141,7 +141,6 @@ export function PostCard({ post }: PostCardProps) {
 
         <div className="relative aspect-[4/3] w-full">
           <img src={post.imageUrl} alt="Animal" className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute top-3 left-3"><UrgencyBadge level={post.urgencyLevel} /></div>
           <div className="absolute top-3 right-3"><StatusBadge status={post.status} /></div>
         </div>
 
@@ -152,12 +151,34 @@ export function PostCard({ post }: PostCardProps) {
           </div>
           <p className="text-sm text-foreground/90 mb-3 leading-relaxed">{post.description}</p>
           
+          {post.recommendations && post.recommendations.length > 0 && (
+            <div className="mb-4 space-y-2 bg-primary/5 p-3 rounded-2xl border border-primary/10">
+              <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Recomendaciones</p>
+              {post.recommendations.map((rec, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <PawPrint className="h-3 w-3 text-primary mt-0.5" />
+                  <p className="text-[11px] font-bold text-foreground/80 leading-tight">{rec}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          
           <div className="flex items-center justify-between pt-3 border-t border-border">
-            <Button variant="ghost" size="sm" onClick={handleLike} className={cn('gap-2', isLiked && 'text-primary')}>
-              <PawPrint className={cn('h-5 w-5', isLiked && 'fill-current')} />
-              <span className="text-sm font-medium">Apoyar</span>
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setIsBookmarked(!isBookmarked)} className={cn(isBookmarked && 'text-primary')}>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={handleLike} className={cn('gap-2', isLiked && 'text-primary')}>
+                <PawPrint className={cn('h-5 w-5', isLiked && 'fill-current')} />
+                <span className="text-[10px] font-black uppercase tracking-tight">Apoyar</span>
+              </Button>
+              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+                <MessageCircle className="h-5 w-5" />
+                <span className="text-[10px] font-black uppercase tracking-tight">{post.comments}</span>
+              </Button>
+              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+                <Share2 className="h-5 w-5" />
+                <span className="text-[10px] font-black uppercase tracking-tight">{post.shares}</span>
+              </Button>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setIsBookmarked(!isBookmarked)} className={cn('h-9 w-9', isBookmarked && 'text-primary')}>
               <Bookmark className={cn('h-5 w-5', isBookmarked && 'fill-current')} />
             </Button>
           </div>
@@ -169,11 +190,11 @@ export function PostCard({ post }: PostCardProps) {
         onDidDismiss={() => setShowActionSheet(false)}
         header="Opciones"
         buttons={[
-          ...(userRole === 'veterinarian' ? [{
+          {
             text: 'Tomar en Custodia',
             icon: bodyOutline,
             handler: () => setShowCamera(true)
-          }] : []),
+          },
           { text: 'Guardar', icon: clipboardOutline, handler: () => setIsBookmarked(true) },
           { text: 'Cancelar', role: 'cancel' }
         ]}

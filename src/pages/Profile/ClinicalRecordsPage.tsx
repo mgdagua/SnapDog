@@ -1,5 +1,5 @@
-import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon, IonList, IonItem, IonTextarea, IonInput, IonSearchbar, IonBackButton } from '@ionic/react'
-import { medicalOutline, addOutline, documentAttachOutline, clipboardOutline, trashOutline, saveOutline, closeOutline, searchOutline, pawOutline, timeOutline, alertCircleOutline, pulseOutline, bandageOutline, folderOpenOutline, chatbubbleEllipsesOutline, chevronBackOutline, createOutline, lockClosedOutline } from 'ionicons/icons'
+import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon, IonList, IonItem, IonTextarea, IonInput, IonSearchbar, IonBackButton, IonModal } from '@ionic/react'
+import { medicalOutline, addOutline, documentAttachOutline, clipboardOutline, trashOutline, saveOutline, closeOutline, searchOutline, pawOutline, timeOutline, alertCircleOutline, pulseOutline, bandageOutline, folderOpenOutline, chatbubbleEllipsesOutline, chevronBackOutline, createOutline, lockClosedOutline, checkmarkCircleOutline, starOutline, trendingUpOutline } from 'ionicons/icons'
 import { BottomNav } from '@/components/feed/bottom-nav'
 import { Badge } from '@/components/ui/badge'
 import { useState, useEffect, useMemo } from 'react'
@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { currentUser, mockPatients } from '@/lib/mock-data'
+import { cn } from '@/lib/utils'
 
 interface Medication {
   name: string
@@ -16,10 +17,16 @@ interface Medication {
 
 export default function ClinicalRecordsPage() {
   const location = useLocation<{ animalId?: string, animalName?: string }>()
+  const isHistoryView = location.pathname === '/history'
   const [showModal, setShowModal] = useState(false)
-  const [isEditing, setIsEditing] = useState(false) // Define si estamos creando uno nuevo o viendo uno viejo
+  const [isEditing, setIsEditing] = useState(false) 
   const [searchText, setSearchText] = useState('')
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
+  const [showTreatedBonus, setShowTreatedBonus] = useState(false)
+  
+  // Estado local para simular la lista de pacientes (activos vs tratados)
+  const [activePatients, setActivePatients] = useState<any[]>([])
+  const [treatedHistory, setTreatedHistory] = useState<any[]>([])
   
   // Estados de la Historia Clínica (Formulario)
   const [animalId, setAnimalId] = useState<string | null>(null)
@@ -33,32 +40,35 @@ export default function ClinicalRecordsPage() {
   const [temperature, setTemperature] = useState('')
   const [heartRate, setHeartRate] = useState('')
 
-  // Filtrar por el centro del veterinario actual
-  const centerPatients = useMemo(() => {
-    return mockPatients.filter(p => p.entity === currentUser.veterinaryCenter)
+  // Inicializar pacientes
+  useEffect(() => {
+    const initialPatients = mockPatients.filter(p => p.entity === currentUser.veterinaryCenter)
+    // Para la demo, tomamos algunos como tratados y otros como activos
+    setActivePatients(initialPatients.slice(0, 2))
+    setTreatedHistory(initialPatients.slice(2))
   }, [])
 
-  // Filtrar por búsqueda
+  // Filtrar por búsqueda y vista
+  const currentList = isHistoryView ? treatedHistory : activePatients
   const filteredPatients = useMemo(() => {
-    if (!searchText) return centerPatients
-    return centerPatients.filter(p => 
+    if (!searchText) return currentList
+    return currentList.filter(p => 
       p.name.toLowerCase().includes(searchText.toLowerCase()) || 
       p.id.toLowerCase().includes(searchText.toLowerCase()) ||
       p.diagnosis.toLowerCase().includes(searchText.toLowerCase())
     )
-  }, [centerPatients, searchText])
+  }, [currentList, searchText])
 
   useEffect(() => {
     if (location.state?.animalId) {
-      const patient = centerPatients.find(p => p.id === location.state.animalId)
+      const patient = currentList.find(p => p.id === location.state.animalId)
       if (patient) {
-        openPatientDetails(patient, false) // Abrir en modo visualización
+        openPatientDetails(patient, false)
       } else {
-        // Si no está en mis pacientes (es un rescate nuevo que busqué por ID)
         const globalPatient = mockPatients.find(p => p.id === location.state.animalId)
         if (globalPatient) {
            openPatientDetails(globalPatient, false)
-        } else {
+        } else if (!isHistoryView) {
           setAnimalId(location.state.animalId)
           setAnimalName(location.state.animalName || 'Paciente')
           setIsEditing(true)
@@ -66,7 +76,7 @@ export default function ClinicalRecordsPage() {
         }
       }
     }
-  }, [location.state, centerPatients])
+  }, [location.state, currentList, isHistoryView])
 
   const openPatientDetails = (patient: any, editMode = false) => {
     setSelectedPatient(patient)
@@ -85,13 +95,15 @@ export default function ClinicalRecordsPage() {
     setShowModal(true)
   }
 
-  const startNewEntry = () => {
-    setIsEditing(true)
-    // Limpiamos campos de diagnóstico y tratamiento para la nueva entrada
-    setDiagnosis('')
-    setNotes('')
-    setMedications([{ name: '', dosage: '', frequency: '' }])
-    setAttachments([])
+  const handleMarkAsTreated = () => {
+    if (selectedPatient) {
+      // Mover de activos a historial
+      setActivePatients(prev => prev.filter(p => p.id !== selectedPatient.id))
+      setTreatedHistory(prev => [selectedPatient, ...prev])
+      // Mostrar Bonus
+      setShowTreatedBonus(true)
+      setShowModal(false)
+    }
   }
 
   const closeModal = () => {
@@ -124,10 +136,6 @@ export default function ClinicalRecordsPage() {
     setMedications(updated)
   }
 
-  const handleFileUpload = () => {
-    setAttachments([...attachments, `Examen_Sangre_${Date.now()}.pdf`])
-  }
-
   return (
     <IonPage>
       <IonHeader className="ion-no-border">
@@ -140,14 +148,16 @@ export default function ClinicalRecordsPage() {
                   <IonMenuButton className="text-foreground" />
                 </IonButtons>
                 <div>
-                  <h1 className="text-2xl font-black tracking-tight text-foreground">Mis Pacientes</h1>
+                  <h1 className="text-2xl font-black tracking-tight text-foreground">
+                    {isHistoryView ? 'Historial de Éxitos' : 'Mis Pacientes'}
+                  </h1>
                   <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">
                     {currentUser.veterinaryCenter}
                   </p>
                 </div>
               </div>
-              <div className="bg-primary/10 p-2 rounded-2xl">
-                <IonIcon icon={pawOutline} className="text-xl text-primary" />
+              <div className={cn("p-2 rounded-2xl", isHistoryView ? "bg-emerald-500/10" : "bg-primary/10")}>
+                <IonIcon icon={isHistoryView ? folderOpenOutline : pawOutline} className={cn("text-xl", isHistoryView ? "text-emerald-600" : "text-primary")} />
               </div>
             </div>
 
@@ -157,7 +167,7 @@ export default function ClinicalRecordsPage() {
               </div>
               <input 
                 type="text"
-                placeholder="Buscar por nombre, ID o diagnóstico..."
+                placeholder={isHistoryView ? "Buscar en el historial..." : "Buscar en pacientes activos..."}
                 className="w-full bg-muted/50 border-2 border-transparent focus:border-primary/20 focus:bg-background h-12 pl-12 pr-4 rounded-2xl text-sm font-bold transition-all outline-none"
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
@@ -172,65 +182,79 @@ export default function ClinicalRecordsPage() {
           <div className="flex justify-between items-center px-2 mb-6 mt-2">
             <div>
               <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-                {filteredPatients.length} Pacientes Activos
+                {filteredPatients.length} {isHistoryView ? 'Casos Exitosos' : 'Pacientes Activos'}
               </p>
             </div>
-            <Button onClick={() => { setIsEditing(true); setShowModal(true); }} variant="ghost" size="sm" className="text-primary font-black gap-1 uppercase text-[10px] tracking-wider">
-              <IonIcon icon={addOutline} className="text-base" /> Nuevo Paciente
-            </Button>
+            {!isHistoryView && (
+              <Button onClick={() => { setAnimalId(null); setAnimalName('Nuevo Paciente'); setIsEditing(true); setShowModal(true); }} variant="ghost" size="sm" className="text-primary font-black gap-1 uppercase text-[10px] tracking-wider">
+                <IonIcon icon={addOutline} className="text-base" /> Nuevo Paciente
+              </Button>
+            )}
           </div>
           
           <div className="grid gap-4">
-            {filteredPatients.map((record) => (
-              <Card 
-                key={record.id}
-                className="border-none bg-card hover:bg-muted/10 transition-all group rounded-[32px] p-1 shadow-sm overflow-hidden"
-              >
-                <div className="p-4">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="relative cursor-pointer" onClick={() => openPatientDetails(record, false)}>
-                      <div className="bg-muted h-16 w-16 rounded-[24px] overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                        <img src={record.image} alt={record.name} className="w-full h-full object-cover" />
+            {filteredPatients.length > 0 ? (
+              filteredPatients.map((record) => (
+                <Card 
+                  key={record.id}
+                  className="border-none bg-card hover:bg-muted/10 transition-all group rounded-[32px] p-1 shadow-sm overflow-hidden"
+                >
+                  <div className="p-4">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="relative cursor-pointer" onClick={() => openPatientDetails(record, false)}>
+                        <div className="bg-muted h-16 w-16 rounded-[24px] overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                          <img src={record.image} alt={record.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 bg-background p-1 rounded-full border border-border">
+                          <div className={cn(
+                            "h-2.5 w-2.5 rounded-full",
+                            isHistoryView ? "bg-emerald-500" : (record.level === 'high' ? 'bg-destructive' : record.level === 'medium' ? 'bg-orange-500' : 'bg-emerald-500')
+                          )} />
+                        </div>
                       </div>
-                      <div className="absolute -bottom-1 -right-1 bg-background p-1 rounded-full border border-border">
-                        <div className={`h-2.5 w-2.5 rounded-full ${record.level === 'high' ? 'bg-destructive' : record.level === 'medium' ? 'bg-orange-500' : 'bg-emerald-500'}`} />
+                      
+                      <div className="flex-1 cursor-pointer" onClick={() => openPatientDetails(record, false)}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-lg text-foreground leading-none">{record.name}</span>
+                          <Badge variant="outline" className="text-[8px] font-mono border-muted-foreground/20 text-muted-foreground py-0">
+                            {record.id}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <IonIcon icon={isHistoryView ? checkmarkCircleOutline : timeOutline} className={cn("text-[10px]", isHistoryView ? "text-emerald-500" : "text-muted-foreground")} />
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            {isHistoryView ? 'Tratado con Éxito' : `Actualizado hace ${record.lastUpdate}`}
+                          </p>
+                        </div>
                       </div>
+                      
+                      {!isHistoryView && (
+                        <Button onClick={(e) => { e.stopPropagation(); openPatientDetails(record, true); }} variant="secondary" size="icon" className="h-10 w-10 rounded-2xl shadow-lg shadow-primary/10">
+                          <IonIcon icon={addOutline} className="text-xl text-primary" />
+                        </Button>
+                      )}
                     </div>
                     
-                    <div className="flex-1 cursor-pointer" onClick={() => openPatientDetails(record, false)}>
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-lg text-foreground leading-none">{record.name}</span>
-                        <Badge variant="outline" className="text-[8px] font-mono border-muted-foreground/20 text-muted-foreground py-0">
-                          {record.id}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <IonIcon icon={timeOutline} className="text-[10px] text-muted-foreground" />
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                          Actualizado hace {record.lastUpdate}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <Button onClick={(e) => { e.stopPropagation(); openPatientDetails(record, true); }} variant="secondary" size="icon" className="h-10 w-10 rounded-2xl shadow-lg shadow-primary/10">
-                      <IonIcon icon={addOutline} className="text-xl text-primary" />
-                    </Button>
-                  </div>
-                  
-                  <div className="bg-muted/40 rounded-2xl p-4 border border-border/10 group-hover:bg-background transition-colors cursor-pointer" onClick={() => openPatientDetails(record, false)}>
-                    <div className="flex items-start gap-2 mb-2">
-                      <div className="bg-primary/10 p-1.5 rounded-lg mt-0.5">
-                        <IonIcon icon={clipboardOutline} className="text-primary text-xs" />
-                      </div>
-                      <div>
-                        <p className="text-[9px] font-black uppercase text-muted-foreground tracking-[0.15em]">Diagnóstico Actual</p>
-                        <p className="text-xs font-black text-foreground">{record.diagnosis}</p>
+                    <div className="bg-muted/40 rounded-2xl p-4 border border-border/10 group-hover:bg-background transition-colors cursor-pointer" onClick={() => openPatientDetails(record, false)}>
+                      <div className="flex items-start gap-2 mb-2">
+                        <div className={cn("p-1.5 rounded-lg mt-0.5", isHistoryView ? "bg-emerald-500/10" : "bg-primary/10")}>
+                          <IonIcon icon={clipboardOutline} className={cn(isHistoryView ? "text-emerald-600" : "text-primary", "text-xs")} />
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-black uppercase text-muted-foreground tracking-[0.15em]">Diagnóstico Resolutivo</p>
+                          <p className="text-xs font-black text-foreground">{record.diagnosis}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 opacity-30">
+                <IonIcon icon={folderOpenOutline} className="text-6xl mb-4" />
+                <p className="font-black uppercase tracking-widest text-xs">No hay registros</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -253,16 +277,22 @@ export default function ClinicalRecordsPage() {
                       <span className="text-[9px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-widest">
                         Expediente: {animalId || 'TEMPORAL'}
                       </span>
-                      {!isEditing && (
-                        <span className="text-[8px] font-black text-muted-foreground flex items-center gap-1 uppercase">
-                          <IonIcon icon={lockClosedOutline} /> Solo Lectura
-                        </span>
-                      )}
                     </div>
                   </div>
                 </div>
-                <div className="bg-primary/10 p-3 rounded-2xl">
-                  <IonIcon icon={medicalOutline} className="text-xl text-primary" />
+                <div className="flex items-center gap-2">
+                  {!isHistoryView && selectedPatient && (
+                    <Button 
+                      onClick={handleMarkAsTreated}
+                      className="h-10 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase text-[10px] tracking-widest flex gap-2 shadow-lg shadow-emerald-500/20"
+                    >
+                      <IonIcon icon={checkmarkCircleOutline} className="text-lg" />
+                      TRATADO
+                    </Button>
+                  )}
+                  <div className={cn("p-3 rounded-2xl", isHistoryView ? "bg-emerald-500/10" : "bg-primary/10")}>
+                    <IonIcon icon={isHistoryView ? checkmarkCircleOutline : medicalOutline} className={cn("text-xl", isHistoryView ? "text-emerald-600" : "text-primary")} />
+                  </div>
                 </div>
               </div>
 
@@ -343,14 +373,13 @@ export default function ClinicalRecordsPage() {
                 </div>
               </div>
 
-              {/* FOOTER DINÁMICO: Cambia según si es lectura o edición */}
               <div className="p-6 bg-card border-t border-border/20 flex gap-3">
                 {!isEditing ? (
                   <>
                     <Button onClick={closeModal} variant="outline" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px]">
                       Cerrar Ficha
                     </Button>
-                    <Button onClick={startNewEntry} className="flex-[2] h-14 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/30 flex gap-3 text-[10px]">
+                    <Button onClick={() => setIsEditing(true)} className="flex-[2] h-14 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/30 flex gap-3 text-[10px]">
                       <IonIcon icon={createOutline} className="text-lg" />
                       Nueva Evolución Médica
                     </Button>
@@ -370,6 +399,35 @@ export default function ClinicalRecordsPage() {
             </Card>
           </div>
         )}
+
+        {/* Modal Bonus Tratado */}
+        <IonModal isOpen={showTreatedBonus} onDidDismiss={() => setShowTreatedBonus(false)} className="bonus-modal">
+          <div className="flex flex-col items-center justify-center h-full bg-background/95 backdrop-blur-2xl p-10 text-center">
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-emerald-400/20 blur-3xl rounded-full animate-pulse" />
+              <div className="bg-emerald-500 p-8 rounded-[40px] shadow-[0_20px_50px_rgba(16,185,129,0.4)] relative animate-bounce">
+                <IonIcon icon={checkmarkCircleOutline} className="text-6xl text-white" />
+              </div>
+              <div className="absolute -top-4 -right-4 bg-yellow-400 p-3 rounded-full shadow-lg">
+                <IonIcon icon={starOutline} className="text-2xl text-yellow-900" />
+              </div>
+            </div>
+            
+            <h2 className="text-5xl font-black text-foreground tracking-tighter mb-4">¡PACIENTE TRATADO!</h2>
+            <div className="bg-emerald-500 px-8 py-3 rounded-3xl shadow-2xl shadow-emerald-500/30 mb-10 transform -rotate-2">
+              <span className="text-white font-black text-3xl tracking-widest">+250 PUNTOS</span>
+            </div>
+            
+            <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs mb-12 leading-relaxed">
+              Has completado el ciclo médico del paciente.<br/>
+              El registro ha sido movido al historial de éxitos.
+            </p>
+            
+            <Button onClick={() => setShowTreatedBonus(false)} className="w-full h-16 rounded-3xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em]">
+              Continuar
+            </Button>
+          </div>
+        </IonModal>
       </IonContent>
       <BottomNav />
     </IonPage>

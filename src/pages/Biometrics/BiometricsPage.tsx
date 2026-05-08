@@ -1,11 +1,13 @@
-import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon, IonInput, IonModal } from '@ionic/react'
-import { shieldCheckmarkOutline, cameraOutline, closeOutline, searchOutline, alertCircleOutline, addCircleOutline, clipboardOutline, timeOutline, addOutline, chevronBackOutline, trendingUpOutline, medalOutline, starOutline } from 'ionicons/icons'
-import { useState, useRef } from 'react'
+import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon, IonInput, IonModal, IonTextarea } from '@ionic/react'
+import { shieldCheckmarkOutline, cameraOutline, closeOutline, searchOutline, alertCircleOutline, addCircleOutline, clipboardOutline, timeOutline, addOutline, chevronBackOutline, trendingUpOutline, medalOutline, starOutline, locationOutline, medicalOutline, informationCircleOutline, heartOutline, checkmarkCircleOutline } from 'ionicons/icons'
+import { useState, useRef, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { BottomNav } from '@/components/feed/bottom-nav'
 import { useHistory } from 'react-router-dom'
+import { currentUser } from '@/lib/mock-data'
+import { cn } from '@/lib/utils'
 
 export default function BiometricsPage() {
   const [flow, setFlow] = useState<'selection' | 'scanning' | 'registering' | 'result'>('selection')
@@ -15,25 +17,58 @@ export default function BiometricsPage() {
   const [generatedId, setGeneratedId] = useState('')
   const [showBonus, setShowBonus] = useState(false)
   
+  // Estados para Registro
+  const [isNearVeterinary, setIsNearVeterinary] = useState(false)
+  const [isCheckingLocation, setIsCheckingLocation] = useState(false)
+  const [clinicalPhoto, setClinicalPhoto] = useState<string | null>(null)
+  const [locationError, setLocationError] = useState<string | null>(null)
+  const [isClinicalStatus, setIsClinicalStatus] = useState(false)
+
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const history = useHistory()
+  const userRole = localStorage.getItem('userRole') || 'volunteer'
+  const isVolunteer = userRole === 'volunteer'
 
-  const startCamera = async () => {
+  const checkLocation = () => {
+    setIsCheckingLocation(true)
+    setLocationError(null)
+    
+    if (!navigator.geolocation) {
+      setLocationError("Geolocalización no soportada")
+      setIsCheckingLocation(false)
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setTimeout(() => {
+          setIsNearVeterinary(true)
+          setIsCheckingLocation(false)
+        }, 1500)
+      },
+      (error) => {
+        setLocationError("Error al obtener ubicación")
+        setIsCheckingLocation(false)
+      }
+    )
+  }
+
+  const startCamera = async (mode: 'scanning' | 'clinical' = 'scanning') => {
     try {
-      setFlow('scanning')
+      if (mode === 'scanning') setFlow('scanning')
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: 'environment' } 
       })
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         streamRef.current = stream
-        simulateScan()
+        if (mode === 'scanning') simulateScan()
       }
     } catch (err) {
       console.error("Error accessing camera:", err)
-      alert("No se pudo acceder a la cámara. Asegúrate de dar los permisos necesarios.")
-      setFlow('selection')
+      alert("No se pudo acceder a la cámara.")
+      if (mode === 'scanning') setFlow('selection')
     }
   }
 
@@ -47,25 +82,23 @@ export default function BiometricsPage() {
   const simulateScan = () => {
     setTimeout(() => {
       stopCamera()
-      // En la simulación siempre sale exitoso si buscamos o escaneamos
       setScanResult('found')
       setFlow('result')
-      setShowBonus(true) // Mostramos el bonus de puntos
+      setShowBonus(true)
     }, 3500)
   }
 
-  const generateUniqueId = () => {
-    const timestamp = Date.now().toString().slice(-4)
-    const random = Math.floor(Math.random() * 9000 + 1000)
-    return `SD-${timestamp}-${random}`
-  }
-
   const handleRegister = () => {
-    const uid = generateUniqueId()
+    if (!isNearVeterinary) {
+      alert("Debes estar en una ubicación de veterinaria para registrar un nuevo paciente.")
+      return
+    }
+    const uid = `SD-${Date.now().toString().slice(-4)}-${Math.floor(Math.random() * 9000 + 1000)}`
     setGeneratedId(uid)
     setFlow('result')
     setScanResult('found')
     setShowBonus(true)
+    setIsClinicalStatus(true) // Al registrar en veterinaria, entra en estado clínico
   }
 
   const resetFlow = () => {
@@ -74,13 +107,15 @@ export default function BiometricsPage() {
     setGeneratedId('')
     setScanResult(null)
     setFlow('selection')
+    setClinicalPhoto(null)
+    setIsNearVeterinary(false)
+    setIsClinicalStatus(false)
   }
 
   const handleSearch = () => {
-    // Simulación exitosa para cualquier código o vacío para pruebas
     setGeneratedId(searchCode || 'SD-123456')
     setNewAnimal({ 
-      name: searchCode === 'SD-123456' ? 'Max' : 'Nuevo Paciente', 
+      name: searchCode === 'SD-123456' ? 'Max' : 'Paciente Detectado', 
       breed: 'Labrador Mestizo', 
       age: '3 años', 
       weight: '12.5' 
@@ -88,6 +123,13 @@ export default function BiometricsPage() {
     setScanResult('found')
     setFlow('result')
     setShowBonus(true)
+    // Para la demo, si es Max ya está en estado clínico
+    if (searchCode === 'SD-123456') setIsClinicalStatus(true)
+  }
+
+  const takeClinicalPhoto = () => {
+    setClinicalPhoto("https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=400&h=300&fit=crop")
+    alert("Foto clínica adjuntada con éxito.")
   }
 
   return (
@@ -118,7 +160,7 @@ export default function BiometricsPage() {
 
               <Card className="p-6 rounded-[32px] border-2 border-primary/20 bg-primary/5">
                 <Button 
-                  onClick={startCamera} 
+                  onClick={() => startCamera('scanning')} 
                   className="w-full h-16 rounded-2xl font-black uppercase tracking-widest text-base shadow-lg shadow-primary/20 flex gap-3 mb-6"
                 >
                   <IonIcon icon={cameraOutline} className="text-xl" />
@@ -131,7 +173,7 @@ export default function BiometricsPage() {
                   <div className="flex-1 h-px bg-border" />
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-6">
                   <div className="flex-1 bg-background rounded-2xl border-2 border-border/60 px-4 flex items-center gap-3">
                     <IonIcon icon={searchOutline} className="text-muted-foreground" />
                     <IonInput 
@@ -144,6 +186,93 @@ export default function BiometricsPage() {
                   <Button onClick={handleSearch} variant="secondary" className="rounded-2xl h-14 w-14 p-0">
                     <IonIcon icon={searchOutline} className="text-xl" />
                   </Button>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <Button 
+                    onClick={() => setFlow('registering')} 
+                    variant="outline" 
+                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] border-2"
+                  >
+                    <IonIcon icon={addCircleOutline} className="text-lg mr-2" />
+                    Registrar Nuevo Animal
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {flow === 'registering' && (
+            <div className="w-full space-y-6 animate-in slide-in-from-right duration-500">
+              <div className="flex items-center gap-4 mb-6">
+                <Button onClick={() => setFlow('selection')} variant="ghost" size="icon" className="rounded-full">
+                  <IonIcon icon={chevronBackOutline} className="text-2xl" />
+                </Button>
+                <h3 className="text-xl font-black text-foreground">Registro de Identidad</h3>
+              </div>
+
+              <Card className="p-6 rounded-[32px] space-y-6 border-none shadow-sm bg-card">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 ml-1">Validación de Ubicación</p>
+                    <Button 
+                      onClick={checkLocation} 
+                      disabled={isCheckingLocation}
+                      variant={isNearVeterinary ? "secondary" : "outline"}
+                      className={cn(
+                        "w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] border-2 flex gap-3",
+                        isNearVeterinary && "bg-emerald-500/10 border-emerald-500/20 text-emerald-600"
+                      )}
+                    >
+                      <IonIcon icon={isNearVeterinary ? shieldCheckmarkOutline : locationOutline} className="text-xl" />
+                      {isCheckingLocation ? "Verificando..." : isNearVeterinary ? "Ubicación Validada (Veterinaria)" : "Verificar Ubicación en Veterinaria"}
+                    </Button>
+                    {locationError && <p className="text-[10px] text-red-500 font-bold mt-2 ml-1 italic">{locationError}</p>}
+                  </div>
+
+                  {isNearVeterinary && (
+                    <div className="animate-in fade-in slide-in-from-top-4 duration-500 space-y-4">
+                      <div className="bg-primary/5 rounded-[24px] p-4 border border-primary/10">
+                        <div className="flex items-start gap-3">
+                          <IonIcon icon={informationCircleOutline} className="text-primary text-xl mt-0.5" />
+                          <p className="text-[11px] font-medium text-foreground leading-tight">
+                            Para cambiar el estado del animal a <span className="font-black text-primary uppercase">entorno clínico</span>, te recomendamos adjuntar una foto en la veterinaria. {isVolunteer && "(Opcional para voluntarios)"}
+                          </p>
+                        </div>
+                        <Button 
+                          onClick={takeClinicalPhoto}
+                          className={cn(
+                            "w-full mt-4 h-12 rounded-xl bg-background border-2 border-primary/20 text-primary font-black uppercase text-[10px] tracking-widest flex gap-2",
+                            clinicalPhoto && "border-emerald-500/50 text-emerald-600 bg-emerald-50"
+                          )}
+                        >
+                          <IonIcon icon={clinicalPhoto ? checkmarkCircleOutline : cameraOutline} className="text-lg" />
+                          {clinicalPhoto ? "Foto Clínica Adjuntada" : "Tomar Foto en Entorno Clínico"}
+                        </Button>
+                      </div>
+
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 ml-1">Datos del Animal</p>
+                        <IonInput 
+                          placeholder="Nombre (si lo tiene)" 
+                          className="bg-muted/50 rounded-2xl h-14 px-6 font-bold"
+                          onIonInput={e => setNewAnimal({...newAnimal, name: e.detail.value!})}
+                        />
+                        <IonInput 
+                          placeholder="Raza / Cruce" 
+                          className="bg-muted/50 rounded-2xl h-14 px-6 font-bold"
+                          onIonInput={e => setNewAnimal({...newAnimal, breed: e.detail.value!})}
+                        />
+                      </div>
+
+                      <Button 
+                        onClick={handleRegister}
+                        className="w-full h-16 rounded-[24px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 mt-6"
+                      >
+                        Formalizar Registro
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </Card>
             </div>
@@ -192,39 +321,111 @@ export default function BiometricsPage() {
                 </div>
               </Card>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 px-2">
-                  <IonIcon icon={clipboardOutline} className="text-primary" />
-                  <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Historia Clínica</h4>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="bg-card border border-border/40 rounded-[24px] p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
-                        <IonIcon icon={timeOutline} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-black text-foreground">Ingreso por Custodia</p>
-                        <p className="text-[9px] font-bold text-muted-foreground">Hoy • Formalización de Rescate</p>
+              {/* SECCIÓN CONDICIONAL SEGÚN ROL */}
+              {isVolunteer ? (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div className="flex items-center gap-2 px-2">
+                    <IonIcon icon={medicalOutline} className="text-primary" />
+                    <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Hoja de Cuidados (Veterinaria)</h4>
+                  </div>
+                  
+                  <Card className="p-6 rounded-[32px] border-none shadow-sm bg-background border border-border/40 space-y-6">
+                    {/* Enfermedad / Diagnóstico */}
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-2">Diagnóstico Previo</p>
+                      <div className="flex items-center gap-2 text-destructive">
+                        <IonIcon icon={alertCircleOutline} />
+                        <span className="text-xs font-black uppercase tracking-tight">Desnutrición Severa / Parásitos</span>
                       </div>
                     </div>
-                    <Badge className="bg-emerald-500 text-[8px]">VINCULADO</Badge>
+
+                    {/* Recomendaciones */}
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-2">Pautas de Cuidado</p>
+                      <p className="text-xs font-bold text-foreground/80 leading-relaxed italic">
+                        "Proporcionar dieta hipercalórica 3 veces al día. Asegurar acceso a agua fresca. Mantener en reposo y evitar sol directo."
+                      </p>
+                    </div>
+
+                    {/* Medicación */}
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-2">Medicación</p>
+                      <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                        <div className="flex items-center gap-2 mb-1">
+                          <IonIcon icon={heartOutline} className="text-primary text-xs" />
+                          <p className="text-[11px] font-black text-primary">Vitamina B12 + Desparasitante</p>
+                        </div>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">1 dosis cada 24 horas vía oral</p>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <div className="bg-primary/5 rounded-[24px] p-4 border border-primary/10">
+                    <div className="flex items-center gap-3 mb-2">
+                      <IonIcon icon={shieldCheckmarkOutline} className="text-primary" />
+                      <p className="text-[10px] font-black uppercase text-primary tracking-widest">Aviso de Seguridad</p>
+                    </div>
+                    <p className="text-[10px] font-medium text-muted-foreground leading-tight italic">
+                      Como voluntario, tu misión es seguir estas indicaciones. No suministres medicamentos no listados ni modifiques la dieta sin previa autorización veterinaria.
+                    </p>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-2">
+                      <IonIcon icon={clipboardOutline} className="text-primary" />
+                      <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Estado del Paciente</h4>
+                    </div>
+                    {isClinicalStatus && (
+                      <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                        <IonIcon icon={medicalOutline} className="mr-1" /> Entorno Clínico
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="bg-card border border-border/40 rounded-[24px] p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                          <IonIcon icon={timeOutline} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-foreground">Custodia Activa</p>
+                          <p className="text-[9px] font-bold text-muted-foreground">Formalizado por {currentUser.name}</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-emerald-500 text-[8px]">VINCULADO</Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="pt-4 space-y-3">
-                <Button 
-                  onClick={() => history.push('/clinical-records', { 
-                    animalId: generatedId || 'SD-123456',
-                    animalName: newAnimal.name || 'Max' 
-                  })}
-                  className="w-full h-16 rounded-[24px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 flex gap-3 text-sm"
-                >
-                  <IonIcon icon={addOutline} className="text-xl" />
-                  Crear Ficha en Clínica
-                </Button>
+                {!isVolunteer ? (
+                  <Button 
+                    onClick={() => history.push('/clinical-records', { 
+                      animalId: generatedId || 'SD-123456',
+                      animalName: newAnimal.name || 'Max' 
+                    })}
+                    className="w-full h-16 rounded-[24px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 flex gap-3 text-sm"
+                  >
+                    <IonIcon icon={addOutline} className="text-xl" />
+                    Crear Ficha en Clínica
+                  </Button>
+                ) : (
+                  /* El botón de reportar solo sale si NO se encontraron recomendaciones previas (ej: animal nuevo) */
+                  /* Pero según la instrucción, cuando lo ENCUENTRA debe primar la recomendación */
+                  flow === 'registering' ? (
+                    <Button 
+                      variant="outline"
+                      className="w-full h-16 rounded-[24px] font-black uppercase tracking-[0.2em] border-2 border-primary text-primary flex gap-3 text-sm"
+                    >
+                      <IonIcon icon={heartOutline} className="text-xl" />
+                      Reportar Estado de Salud
+                    </Button>
+                  ) : null
+                )}
                 
                 <Button variant="ghost" onClick={resetFlow} className="w-full h-12 text-muted-foreground font-black uppercase tracking-widest text-[10px]">
                   Finalizar Proceso

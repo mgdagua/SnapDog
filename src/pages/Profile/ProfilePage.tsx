@@ -9,6 +9,10 @@ import { currentUser, mockPosts } from '@/lib/mock-data'
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('posts')
+  const userRole = localStorage.getItem('userRole') || 'volunteer'
+  const userName = localStorage.getItem('userName') || currentUser.name
+  const userAvatar = localStorage.getItem('userAvatar') || currentUser.avatar
+  const isVeterinarian = userRole === 'veterinarian'
 
   return (
     <IonPage>
@@ -33,8 +37,8 @@ export default function ProfilePage() {
             <div className="flex items-center gap-6 mb-4">
               <div className="relative">
                 <Avatar className="h-24 w-24 ring-4 ring-primary/20 p-1 bg-background">
-                  <AvatarImage src={currentUser.avatar} alt={currentUser.name} className="rounded-full" />
-                  <AvatarFallback className="text-2xl">{currentUser.name.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={userAvatar} alt={userName} className="rounded-full" />
+                  <AvatarFallback className="text-2xl">{userName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="absolute -bottom-1 -right-1 bg-primary text-white p-1.5 rounded-full border-4 border-background">
                   <IonIcon icon={ribbonOutline} className="text-sm" />
@@ -43,8 +47,10 @@ export default function ProfilePage() {
               
               <div className="flex-1">
                 <div className="flex flex-col gap-1 mb-3">
-                  <h2 className="text-2xl font-black text-foreground leading-none">{currentUser.name}</h2>
-                  <p className="text-sm text-muted-foreground font-medium">@mariag_voluntaria</p>
+                  <h2 className="text-2xl font-black text-foreground leading-none">{userName}</h2>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {isVeterinarian ? '@pedrog_vet' : '@mariag_voluntaria'}
+                  </p>
                 </div>
                 
                 <div className="flex gap-4">
@@ -66,10 +72,13 @@ export default function ProfilePage() {
 
             <div className="mb-6">
               <p className="text-sm text-foreground leading-relaxed">
-                Voluntaria apasionada por el bienestar animal en Popayán. 🐾 <br />
-                Coordinadora de rescates en el Centro Histórico.
+                {isVeterinarian 
+                  ? 'Veterinario comprometido con el rescate y bienestar animal. Especialista en cirugía y trauma. 🏥' 
+                  : 'Voluntaria apasionada por el bienestar animal en Popayán. 🐾 Coordinadora de rescates en el Centro Histórico.'}
               </p>
-              <p className="text-xs text-primary font-bold mt-1">snapdog.app/mariag</p>
+              <p className="text-xs text-primary font-bold mt-1">
+                {isVeterinarian ? 'snapdog.app/pedrog' : 'snapdog.app/mariag'}
+              </p>
             </div>
 
             <div className="flex gap-2">
