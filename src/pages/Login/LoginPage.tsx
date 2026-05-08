@@ -13,19 +13,20 @@ export default function LoginPage() {
   const history = useHistory()
 
   const handleLogin = (e: React.FormEvent) => {
+    // Evitamos que el formulario recargue la página prematuramente
     e.preventDefault()
-
-    if (role === 'veterinarian') {
-      history.push({
-        pathname: '/home',
-        state: { role: role }
-      })
-    } else {
-      history.push({
-        pathname: '/volunteer', // <--- Te dirige a tu dashboard de voluntario
-        state: { role: role }
-      })
-    }
+    
+    // Guardamos el rol en memoria
+    localStorage.setItem('userRole', role) 
+    
+    // Navegamos con el Router de Ionic
+    history.push('/home')
+    
+    // TRUCO DEFINITIVO: Forzamos la recarga de toda la ventana 100ms después
+    // Esto asegura que el App.tsx y el SideMenu lean el localStorage nuevo
+    setTimeout(() => {
+      window.location.reload()
+    }, 100)
   }
 
   return (
@@ -33,7 +34,7 @@ export default function LoginPage() {
       <IonContent fullscreen className="--background: var(--background);">
         <div className="min-h-screen flex flex-col px-8 pt-16 pb-10 max-w-md mx-auto bg-background text-foreground">
           
-          {/* Premium Logo Frame - Centered & Optimized */}
+          {/* Premium Logo Frame */}
           <div className="flex flex-col items-center mb-12 animate-in fade-in slide-in-from-top-8 duration-1000">
             <div className="w-full max-w-[300px] h-36 p-1 rounded-[2.5rem] bg-gradient-to-br from-primary/20 via-transparent to-primary/10 border border-primary/10 shadow-2xl shadow-primary/5 flex items-center justify-center mb-6 relative overflow-hidden group">
               <div className="absolute inset-0 bg-white/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -48,16 +49,16 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Section: Role Selection - Centered Typography */}
           <div className="mb-6 text-center">
             <h2 className="text-base font-black text-foreground uppercase tracking-widest mb-1">Tipo de Perfil</h2>
             <p className="text-xs text-muted-foreground font-medium">Selecciona tu rol en la red para ingresar</p>
           </div>
 
-          {/* Selector de Rol (Centered Grid) */}
+          {/* Selector de Rol */}
           <div className="grid grid-cols-2 gap-4 mb-12">
             <button
               onClick={() => setRole('volunteer')}
+              type="button" // IMPORTANTE para que no active el submit
               className={cn(
                 "group flex flex-col items-center justify-center p-6 rounded-[2.5rem] border-2 transition-all duration-500",
                 role === 'volunteer' 
@@ -79,6 +80,7 @@ export default function LoginPage() {
 
             <button
               onClick={() => setRole('veterinarian')}
+              type="button" // IMPORTANTE para que no active el submit
               className={cn(
                 "group flex flex-col items-center justify-center p-6 rounded-[2.5rem] border-2 transition-all duration-500",
                 role === 'veterinarian' 
@@ -99,7 +101,7 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Formulario de Login - Reverted to Left-Aligned Inputs */}
+          {/* Formulario de Login */}
           <form onSubmit={handleLogin} className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
             <div className="space-y-3">
               <div className="px-2">
@@ -125,14 +127,14 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Social and Footer - Centered */}
+          {/* Social and Footer */}
           <div className="mt-14 flex flex-col items-center">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-6">O ingresa con</p>
             <div className="flex gap-6 mb-12">
-              <button className="w-14 h-14 rounded-2xl bg-card border border-border/40 flex items-center justify-center shadow-sm hover:bg-muted transition-all active:scale-90">
+              <button type="button" className="w-14 h-14 rounded-2xl bg-card border border-border/40 flex items-center justify-center shadow-sm hover:bg-muted transition-all active:scale-90">
                 <IonIcon icon={logoGoogle} className="text-xl" />
               </button>
-              <button className="w-14 h-14 rounded-2xl bg-card border border-border/40 flex items-center justify-center shadow-sm hover:bg-muted transition-all active:scale-90">
+              <button type="button" className="w-14 h-14 rounded-2xl bg-card border border-border/40 flex items-center justify-center shadow-sm hover:bg-muted transition-all active:scale-90">
                 <IonIcon icon={logoApple} className="text-xl" />
               </button>
             </div>

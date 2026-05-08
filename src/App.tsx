@@ -1,7 +1,7 @@
 import React from 'react'
 import { IonReactRouter } from '@ionic/react-router'
 import { IonRouterOutlet, IonSplitPane } from '@ionic/react'
-import { Route} from 'react-router-dom'
+import { Route, Redirect } from 'react-router-dom' // Añadimos Redirect
 import { SideMenu } from './components/menu/SideMenu'
 import VetDashboard from './pages/Veterinarian/VetDashboard'
 import MapPage from './pages/Map/MapPage'
@@ -10,9 +10,9 @@ import BiometricsPage from './pages/Biometrics/BiometricsPage'
 import ProfilePage from './pages/Profile/ProfilePage'
 import ClinicalRecordsPage from './pages/Profile/ClinicalRecordsPage'
 import LoginPage from './pages/Login/LoginPage'
-import VolunteerDashboard from './pages/Volunteer/VolunteerDashboard' // Asegúrate de importar tu dashboard
+import VolunteerDashboard from './pages/Volunteer/VolunteerDashboard'
 
-/* Core CSS required for Ionic components to work properly */
+/* Core CSS */
 import '@ionic/react/css/core.css'
 import '@ionic/react/css/normalize.css'
 import '@ionic/react/css/structure.css'
@@ -34,9 +34,16 @@ const App: React.FC = () => (
         <Route exact path="/">
           <LoginPage />
         </Route>
-        <Route exact path="/home">
-          <VetDashboard />
-        </Route>
+        
+        {/* Ruteador Inteligente en línea. ¡Esto no falla! */}
+        <Route exact path="/home" render={() => {
+          const role = localStorage.getItem('userRole')
+          if (role === 'veterinarian') {
+            return <VetDashboard />
+          }
+          return <VolunteerDashboard />
+        }} />
+        
         <Route exact path="/map">
           <MapPage />
         </Route>
@@ -52,9 +59,11 @@ const App: React.FC = () => (
         <Route exact path="/clinical-records">
           <ClinicalRecordsPage />
         </Route>
+        
         <Route exact path="/volunteer">
           <VolunteerDashboard />
         </Route>
+        
         <Route exact path="/network">
           <ClinicalRecordsPage />
         </Route>

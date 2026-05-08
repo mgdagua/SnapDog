@@ -42,7 +42,10 @@ const toolItems = [
 
 export function SideMenu() {
   const location = useLocation<{ role: string }>()
-  const isVeterinarian = location.state?.role === 'veterinarian'
+  //const isVeterinarian = location.state?.role === 'veterinarian'
+
+  const savedRole = localStorage.getItem('userRole') || 'volunteer'
+  const isVeterinarian = savedRole === 'veterinarian'
 
   return (
     <IonMenu contentId="main-content" type="overlay">
