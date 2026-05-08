@@ -1,7 +1,7 @@
 import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon } from '@ionic/react'
 import { flaskOutline, scanOutline, shieldCheckmarkOutline } from 'ionicons/icons'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
 
 export default function BiometricsPage() {
   return (

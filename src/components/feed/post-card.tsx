@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Heart, MessageCircle, Share2, MapPin, Clock, MoreHorizontal, Bookmark, Shield } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { cn } from '../../lib/utils'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
 import { UrgencyBadge } from './urgency-badge'
 import { StatusBadge } from './status-badge'
-import type { AnimalPost } from '@/lib/types'
+import type { AnimalPost } from '../../lib/types'
 
 interface PostCardProps {
   post: AnimalPost

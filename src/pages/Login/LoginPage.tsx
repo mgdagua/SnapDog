@@ -2,11 +2,11 @@ import { IonContent, IonPage, IonIcon } from '@ionic/react'
 import { personOutline, medicalOutline, arrowForwardOutline, logoGoogle, logoApple } from 'ionicons/icons'
 import { useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import logoImg from '@/assets/Logo.jpeg'
-import { cn } from '@/lib/utils'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
+import logoImg from '../../assets/Logo.jpeg'
+import { cn } from '../../lib/utils'
 
 export default function LoginPage() {
   const [role, setRole] = useState<'volunteer' | 'veterinarian'>('volunteer')

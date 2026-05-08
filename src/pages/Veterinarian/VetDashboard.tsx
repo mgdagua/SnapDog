@@ -1,12 +1,12 @@
 import { IonContent, IonPage } from '@ionic/react'
 import { useLocation } from 'react-router-dom'
-import { mockPosts } from '@/lib/mock-data'
-import { PostCard } from '@/components/feed/post-card'
-import { Header } from '@/components/feed/header'
-import { BottomNav } from '@/components/feed/bottom-nav'
-import { StoriesBar } from '@/components/feed/stories-bar'
-import { QuickStats } from '@/components/feed/quick-stats'
-import { ReportButton } from '@/components/feed/report-button'
+import { mockPosts } from '../../lib/mock-data'
+import { PostCard } from '../../components/feed/post-card'
+import { Header } from '../../components/feed/header'
+import { BottomNav } from '../../components/feed/bottom-nav'
+import { StoriesBar } from '../../components/feed/stories-bar'
+import { QuickStats } from '../../components/feed/quick-stats'
+import { ReportButton } from '../../components/feed/report-button'
 
 export default function VetDashboard() {
   const location = useLocation<{ role: string }>()

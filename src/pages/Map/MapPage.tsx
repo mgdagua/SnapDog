@@ -1,7 +1,7 @@
 import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon } from '@ionic/react'
 import { mapOutline, alertTriangleOutline, analyticsOutline } from 'ionicons/icons'
-import { Card } from '@/components/ui/card'
-import { BottomNav } from '@/components/feed/bottom-nav'
+import { Card } from '../../components/ui/card'
+import { BottomNav } from '../../components/feed/bottom-nav'
 
 export default function MapPage() {
   return (

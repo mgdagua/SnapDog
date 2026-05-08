@@ -25,8 +25,8 @@ import {
   globeOutline,
 } from 'ionicons/icons'
 import { useLocation } from 'react-router-dom'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { currentUser } from '@/lib/mock-data'
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
+import { currentUser } from '../../lib/mock-data'
 
 const menuItems = [
   { title: 'Inicio', url: '/home', icon: homeOutline },
