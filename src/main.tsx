@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { IonApp, setupIonicReact } from '@ionic/react'
 import App from './App'
 import './index.css'
+import 'leaflet/dist/leaflet.css'
 
 setupIonicReact()
 

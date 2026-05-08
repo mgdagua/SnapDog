@@ -1,12 +1,11 @@
-import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react'
-import { settingsOutline, gridOutline, ribbonOutline, informationCircleOutline, heartOutline, shareOutline, editOutline } from 'ionicons/icons'
+import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonMenuButton, IonIcon, IonSegment, IonSegmentButton } from '@ionic/react'
+import { settingsOutline, gridOutline, ribbonOutline, informationCircleOutline, heartOutline, shareOutline } from 'ionicons/icons'
 import { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { BottomNav } from '@/components/feed/bottom-nav'
 import { currentUser, mockPosts } from '@/lib/mock-data'
-import { cn } from '@/lib/utils'
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('posts')

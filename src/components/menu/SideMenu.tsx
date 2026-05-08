@@ -12,13 +12,8 @@ import {
 } from '@ionic/react'
 import {
   homeOutline,
-  mapOutline,
-  trophyOutline,
   cameraOutline,
-  flaskOutline,
-  analyticsOutline,
   medicalOutline,
-  personOutline,
   settingsOutline,
   scanOutline,
   clipboardOutline,
@@ -43,9 +38,15 @@ const toolItems = [
 export function SideMenu() {
   const location = useLocation<{ role: string }>()
   const isVeterinarian = location.state?.role === 'veterinarian'
+  const isLoginPage = location.pathname === '/'
+
+  // Filtrar menuItems: Los veterinarios no necesitan "Reportar" en el sidebar
+  const filteredMenuItems = isVeterinarian 
+    ? menuItems.filter(item => item.title !== 'Reportar')
+    : menuItems;
 
   return (
-    <IonMenu contentId="main-content" type="overlay">
+    <IonMenu contentId="main-content" type="overlay" disabled={isLoginPage}>
       <IonHeader className="ion-no-border">
         <IonToolbar className="--background: var(--card);">
           <div className="px-6 py-6">
@@ -69,7 +70,7 @@ export function SideMenu() {
         <div className="mb-4">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 mb-2">Principal</p>
           <IonList className="bg-transparent" lines="none">
-            {menuItems.map((item) => (
+            {filteredMenuItems.map((item) => (
               <IonMenuToggle key={item.title} autoHide={false}>
                 <IonItem
                   routerLink={item.url}

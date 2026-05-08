@@ -25,6 +25,7 @@ export const mockPosts: AnimalPost[] = [
     comments: 12,
     shares: 8,
     isLiked: false,
+    coordinates: { lat: 2.4419, lng: -76.6063 },
     author: {
       name: 'Carlos Mendez',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
@@ -51,6 +52,7 @@ export const mockPosts: AnimalPost[] = [
     comments: 23,
     shares: 15,
     isLiked: true,
+    coordinates: { lat: 2.4448, lng: -76.5985 },
     author: {
       name: 'Dra. Ana Rodriguez',
       avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face',
@@ -71,6 +73,7 @@ export const mockPosts: AnimalPost[] = [
     comments: 18,
     shares: 11,
     isLiked: false,
+    coordinates: { lat: 2.4594, lng: -76.5928 },
     author: {
       name: 'Laura Perez',
       avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
@@ -97,6 +100,7 @@ export const mockPosts: AnimalPost[] = [
     comments: 34,
     shares: 22,
     isLiked: true,
+    coordinates: { lat: 2.4350, lng: -76.6150 },
     author: {
       name: 'Dr. Pedro Gomez',
       avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face',
@@ -117,6 +121,7 @@ export const mockPosts: AnimalPost[] = [
     comments: 15,
     shares: 9,
     isLiked: false,
+    coordinates: { lat: 2.4400, lng: -76.6000 },
     author: {
       name: 'Sofia Ramirez',
       avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face',

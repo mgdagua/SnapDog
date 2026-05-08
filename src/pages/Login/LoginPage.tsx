@@ -33,18 +33,17 @@ export default function LoginPage() {
       <IonContent fullscreen className="--background: var(--background);">
         <div className="min-h-screen flex flex-col px-8 pt-16 pb-10 max-w-md mx-auto bg-background text-foreground">
           
-          {/* Premium Logo Frame - Centered & Optimized */}
+          {/* Clean Logo Branding - No Frame */}
           <div className="flex flex-col items-center mb-12 animate-in fade-in slide-in-from-top-8 duration-1000">
-            <div className="w-full max-w-[300px] h-36 p-1 rounded-[2.5rem] bg-gradient-to-br from-primary/20 via-transparent to-primary/10 border border-primary/10 shadow-2xl shadow-primary/5 flex items-center justify-center mb-6 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-white/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="w-full max-w-[300px] h-32 flex items-center justify-center mb-6">
               <img 
                 src={logoImg} 
                 alt="SnapDog" 
-                className="w-full h-full object-contain relative z-10 p-4" 
+                className="w-full h-full object-contain" 
               />
             </div>
-            <p className="text-[11px] font-black text-primary uppercase tracking-[0.4em] text-center opacity-90">
-              Trazabilidad Animal Inteligente
+            <p className="text-[14px] font-black text-primary uppercase tracking-[0.4em] text-center opacity-90">
+              SnapDog, donde cada Snap deja huella
             </p>
           </div>
 
