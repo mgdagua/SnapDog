@@ -14,10 +14,18 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    history.push({
-      pathname: '/home',
-      state: { role: role }
-    })
+
+    if (role === 'veterinarian') {
+      history.push({
+        pathname: '/home',
+        state: { role: role }
+      })
+    } else {
+      history.push({
+        pathname: '/volunteer', // <--- Te dirige a tu dashboard de voluntario
+        state: { role: role }
+      })
+    }
   }
 
   return (

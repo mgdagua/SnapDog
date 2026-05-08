@@ -10,6 +10,7 @@ import BiometricsPage from './pages/Biometrics/BiometricsPage'
 import ProfilePage from './pages/Profile/ProfilePage'
 import ClinicalRecordsPage from './pages/Profile/ClinicalRecordsPage'
 import LoginPage from './pages/Login/LoginPage'
+import VolunteerDashboard from './pages/Volunteer/VolunteerDashboard' // Asegúrate de importar tu dashboard
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css'
@@ -50,6 +51,9 @@ const App: React.FC = () => (
         </Route>
         <Route exact path="/clinical-records">
           <ClinicalRecordsPage />
+        </Route>
+        <Route exact path="/volunteer">
+          <VolunteerDashboard />
         </Route>
         <Route exact path="/network">
           <ClinicalRecordsPage />
