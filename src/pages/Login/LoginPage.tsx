@@ -10,30 +10,54 @@ import { cn } from '../../lib/utils'
 
 export default function LoginPage() {
   const [role, setRole] = useState<'volunteer' | 'veterinarian'>('volunteer')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const history = useHistory()
 
   const handleLogin = (e: React.FormEvent) => {
-    // Evitamos que el formulario recargue la página prematuramente
     e.preventDefault()
-    
-    // Guardamos el rol en memoria
-    localStorage.setItem('userRole', role) 
-    
-    // Navegamos con el Router de Ionic
-    history.push('/home')
-    
-    // TRUCO DEFINITIVO: Forzamos la recarga de toda la ventana 100ms después
-    // Esto asegura que el App.tsx y el SideMenu lean el localStorage nuevo
-    setTimeout(() => {
-      window.location.reload()
-    }, 100)
+    setError('')
+
+    // Credenciales Estándar
+    const users = {
+      volunteer: {
+        email: 'voluntario@snapdog.com',
+        password: '123',
+        name: 'María García',
+        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face'
+      },
+      veterinarian: {
+        email: 'veterinario@snapdog.com',
+        password: '123',
+        name: 'Dr. Pedro Gómez',
+        avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face'
+      }
+    }
+
+    const selectedUser = role === 'volunteer' ? users.volunteer : users.veterinarian
+
+    if (email === selectedUser.email && password === selectedUser.password) {
+      // Guardamos el rol y datos de usuario en localStorage
+      localStorage.setItem('userRole', role)
+      localStorage.setItem('userName', selectedUser.name)
+      localStorage.setItem('userAvatar', selectedUser.avatar)
+
+      history.push('/home')
+
+      setTimeout(() => {
+        window.location.reload()
+      }, 100)
+    } else {
+      setError('Credenciales incorrectas para el rol seleccionado.')
+    }
   }
 
   return (
     <IonPage>
       <IonContent fullscreen className="--background: var(--background);">
         <div className="min-h-screen flex flex-col px-8 pt-16 pb-10 max-w-md mx-auto bg-background text-foreground">
-          
+
           {/* Premium Logo Frame */}
           <div className="flex flex-col items-center mb-12 animate-in fade-in slide-in-from-top-8 duration-1000">
             <div className="w-full max-w-[300px] h-32 flex items-center justify-center mb-6">
@@ -56,8 +80,8 @@ export default function LoginPage() {
           {/* Selector de Rol */}
           <div className="grid grid-cols-2 gap-4 mb-12">
             <button
-              onClick={() => setRole('volunteer')}
-              type="button" // IMPORTANTE para que no active el submit
+              onClick={() => { setRole('volunteer'); setError(''); }}
+              type="button"
               className={cn(
                 "group flex flex-col items-center justify-center p-6 rounded-[2.5rem] border-2 transition-all duration-500",
                 role === 'volunteer' 
@@ -78,8 +102,8 @@ export default function LoginPage() {
             </button>
 
             <button
-              onClick={() => setRole('veterinarian')}
-              type="button" // IMPORTANTE para que no active el submit
+              onClick={() => { setRole('veterinarian'); setError(''); }}
+              type="button"
               className={cn(
                 "group flex flex-col items-center justify-center p-6 rounded-[2.5rem] border-2 transition-all duration-500",
                 role === 'veterinarian' 
@@ -107,17 +131,26 @@ export default function LoginPage() {
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Credenciales de Acceso</Label>
               </div>
               <Input 
-                type="text" 
-                placeholder="Email o Teléfono" 
+                type="email" 
+                placeholder="Email corporativo" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="rounded-2xl h-14 bg-muted/40 border-0 focus-visible:ring-2 ring-primary/30 text-base px-6"
                 required
               />
               <Input 
                 type="password" 
                 placeholder="Contraseña" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="rounded-2xl h-14 bg-muted/40 border-0 focus-visible:ring-2 ring-primary/30 text-base px-6"
                 required
               />
+              {error && (
+                <p className="text-[10px] font-bold text-red-500 uppercase tracking-tight px-2 text-center">
+                  {error}
+                </p>
+              )}
             </div>
 
             <Button type="submit" className="w-full h-15 rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-2xl shadow-primary/40 transition-all active:scale-95 flex gap-3 hover:brightness-110 bg-primary">
@@ -137,7 +170,7 @@ export default function LoginPage() {
                 <IonIcon icon={logoApple} className="text-xl" />
               </button>
             </div>
-            
+
             <p className="text-xs text-muted-foreground text-center">
               ¿Eres nuevo en SnapDog? <br />
               <span className="text-primary font-black hover:underline underline-offset-4 cursor-pointer mt-1 inline-block">Crea una cuenta ahora</span>

@@ -17,33 +17,33 @@ import {
   settingsOutline,
   scanOutline,
   clipboardOutline,
-  globeOutline,
 } from 'ionicons/icons'
 import { useLocation } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
 import { currentUser } from '../../lib/mock-data'
 
 const menuItems = [
-  { title: 'Inicio', url: '/home', icon: homeOutline },
-  { title: 'Reportar', url: '/report', icon: cameraOutline },
+  { title: 'Inicio', url: '/home', icon: homeOutline, roles: ['volunteer', 'veterinarian'] },
+  { title: 'Reportar', url: '/report', icon: cameraOutline, roles: ['volunteer'] },
 ]
 
 const toolItems = [
-  { title: 'Escáner Biométrico', url: '/biometrics', icon: scanOutline },
-  { title: 'Pacientes Activos', url: '/active-patients', icon: clipboardOutline },
-  { title: 'Historial Clínico Global', url: '/clinical-records', icon: medicalOutline },
-  { title: 'Red Interoperable', url: '/network', icon: globeOutline },
+  { title: 'Escáner Biométrico', url: '/biometrics', icon: scanOutline, roles: ['volunteer', 'veterinarian'] },
+  { title: 'Pacientes Activos', url: '/active-patients', icon: clipboardOutline, roles: ['veterinarian'] },
+  { title: 'Historias Clínicas', url: '/clinical-records', icon: medicalOutline, roles: ['veterinarian'] },
 ]
 
 export function SideMenu() {
-  const location = useLocation<{ role: string }>()
-  const isVeterinarian = location.state?.role === 'veterinarian'
+  const location = useLocation()
+  const userRole = localStorage.getItem('userRole') || 'volunteer'
+  const userName = localStorage.getItem('userName') || currentUser.name
+  const userAvatar = localStorage.getItem('userAvatar') || currentUser.avatar
+  
+  const isVeterinarian = userRole === 'veterinarian'
   const isLoginPage = location.pathname === '/'
 
-  // Filtrar menuItems: Los veterinarios no necesitan "Reportar" en el sidebar
-  const filteredMenuItems = isVeterinarian 
-    ? menuItems.filter(item => item.title !== 'Reportar')
-    : menuItems;
+  const filteredMenuItems = menuItems.filter(item => item.roles.includes(userRole))
+  const filteredToolItems = toolItems.filter(item => item.roles.includes(userRole))
 
   return (
     <IonMenu contentId="main-content" type="overlay" disabled={isLoginPage}>
@@ -58,8 +58,9 @@ export function SideMenu() {
             </div>
             
             <div className="bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 inline-flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                ⚡ {isVeterinarian ? 'Veterinario' : 'Voluntario'}
+              <div className={`w-2 h-2 rounded-full ${isVeterinarian ? 'bg-blue-500' : 'bg-primary'} animate-pulse`} />
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+                Modo {isVeterinarian ? 'Veterinario' : 'Voluntario'}
               </span>
             </div>
           </div>
@@ -67,19 +68,19 @@ export function SideMenu() {
       </IonHeader>
 
       <IonContent className="ion-padding-horizontal">
-        <div className="mb-4">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 mb-2">Principal</p>
-          <IonList className="bg-transparent" lines="none">
+        <div className="mb-8">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-4 mb-4 opacity-50">Menú Principal</p>
+          <IonList className="bg-transparent space-y-1" lines="none">
             {filteredMenuItems.map((item) => (
               <IonMenuToggle key={item.title} autoHide={false}>
                 <IonItem
                   routerLink={item.url}
                   routerDirection="none"
-                  className={`${location.pathname === item.url ? 'active-menu-item' : ''} mb-1 rounded-xl overflow-hidden`}
+                  className={`${location.pathname === item.url ? 'active-menu-item' : ''} rounded-2xl transition-all duration-300 mx-2`}
                   detail={false}
                 >
                   <IonIcon slot="start" icon={item.icon} className="text-xl" />
-                  <IonLabel className="font-semibold text-sm">{item.title}</IonLabel>
+                  <IonLabel className="font-bold text-sm tracking-tight">{item.title}</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             ))}
@@ -87,18 +88,18 @@ export function SideMenu() {
         </div>
 
         <div>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 mb-2">Herramientas</p>
-          <IonList className="bg-transparent" lines="none">
-            {toolItems.map((item) => (
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-4 mb-4 opacity-50">Herramientas Pro</p>
+          <IonList className="bg-transparent space-y-1" lines="none">
+            {filteredToolItems.map((item) => (
               <IonMenuToggle key={item.title} autoHide={false}>
                 <IonItem
                   routerLink={item.url}
                   routerDirection="none"
-                  className={`${location.pathname === item.url ? 'active-menu-item' : ''} mb-1 rounded-xl overflow-hidden`}
+                  className={`${location.pathname === item.url ? 'active-menu-item' : ''} rounded-2xl transition-all duration-300 mx-2`}
                   detail={false}
                 >
                   <IonIcon slot="start" icon={item.icon} className="text-xl" />
-                  <IonLabel className="font-semibold text-sm">{item.title}</IonLabel>
+                  <IonLabel className="font-bold text-sm tracking-tight">{item.title}</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             ))}
@@ -108,19 +109,27 @@ export function SideMenu() {
 
       <IonFooter className="ion-no-border">
         <div className="p-4">
-          <div className="bg-muted/50 rounded-2xl p-4 flex items-center gap-3">
-            <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-              <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-              <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+          <div className="bg-card border border-border/40 rounded-[2rem] p-4 flex items-center gap-3 shadow-sm">
+            <Avatar className="h-10 w-10 ring-2 ring-primary/10">
+              <AvatarImage src={userAvatar} alt={userName} />
+              <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-sm text-foreground truncate">{currentUser.name}</p>
-              <p className="text-xs text-primary font-medium">⭐ {currentUser.points.toLocaleString()} pts</p>
+              <p className="font-black text-sm text-foreground truncate">{userName}</p>
+              <p className="text-[10px] text-primary font-black uppercase tracking-tighter">
+                {isVeterinarian ? 'Misión: Sanidad Animal' : `⭐ ${currentUser.points.toLocaleString()} puntos`}
+              </p>
             </div>
-            <IonIcon icon={settingsOutline} className="text-muted-foreground text-xl" />
+            <IonMenuToggle>
+              <IonItem routerLink="/" routerDirection="back" lines="none" className="--background: transparent; --padding-start: 0;">
+                <IonIcon icon={settingsOutline} className="text-muted-foreground text-xl" />
+              </IonItem>
+            </IonMenuToggle>
           </div>
         </div>
       </IonFooter>
     </IonMenu>
   )
 }
+
+
