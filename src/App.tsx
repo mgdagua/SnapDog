@@ -8,6 +8,8 @@ import MapPage from './pages/Map/MapPage'
 import RankingPage from './pages/Ranking/RankingPage'
 import BiometricsPage from './pages/Biometrics/BiometricsPage'
 import ProfilePage from './pages/Profile/ProfilePage'
+import ClinicalRecordsPage from './pages/Profile/ClinicalRecordsPage'
+import LoginPage from './pages/Login/LoginPage'
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css'
@@ -28,6 +30,9 @@ const App: React.FC = () => (
     <IonSplitPane contentId="main-content">
       <SideMenu />
       <IonRouterOutlet id="main-content">
+        <Route exact path="/">
+          <LoginPage />
+        </Route>
         <Route exact path="/home">
           <VetDashboard />
         </Route>
@@ -43,8 +48,14 @@ const App: React.FC = () => (
         <Route exact path="/profile">
           <ProfilePage />
         </Route>
-        <Route exact path="/">
-          <Redirect to="/home" />
+        <Route exact path="/clinical-records">
+          <ClinicalRecordsPage />
+        </Route>
+        <Route exact path="/network">
+          <ClinicalRecordsPage />
+        </Route>
+        <Route exact path="/active-patients">
+          <ClinicalRecordsPage />
         </Route>
       </IonRouterOutlet>
     </IonSplitPane>

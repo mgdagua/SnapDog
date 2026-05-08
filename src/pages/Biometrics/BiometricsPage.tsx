@@ -41,29 +41,38 @@ export default function BiometricsPage() {
                 <IonIcon icon={shieldCheckmarkOutline} className="text-2xl text-success" />
               </div>
               <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Coincidencia Encontrada</p>
-                <p className="font-black text-foreground">Max (ID: SD-2847)</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Identidad Verificada</p>
+                <p className="font-black text-foreground">Max</p>
+                <p className="text-xs font-mono text-primary font-bold">UID: 941.002.847-X</p>
               </div>
               <div className="ml-auto bg-success text-white px-3 py-1 rounded-full text-[10px] font-black">
-                97.4% CONFIDENCIALIDAD
+                97.4% MATCH
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-2 gap-3 text-xs mb-4">
               <div className="bg-muted/40 p-3 rounded-xl">
-                <p className="text-muted-foreground mb-1">Especie</p>
-                <p className="font-bold">Canino</p>
+                <p className="text-muted-foreground mb-1">Entidad Registro</p>
+                <p className="font-bold truncate">Clínica San Roque</p>
               </div>
               <div className="bg-muted/40 p-3 rounded-xl">
-                <p className="text-muted-foreground mb-1">Raza</p>
-                <p className="font-bold">Mestizo</p>
+                <p className="text-muted-foreground mb-1">Último Tratamiento</p>
+                <p className="font-bold">Desparasitación</p>
+              </div>
+            </div>
+
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4">
+              <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">Interoperabilidad Global</p>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-success rounded-full animate-ping" />
+                <p className="text-xs font-medium text-foreground">3 registros encontrados en red (Popayán/Norte)</p>
               </div>
             </div>
           </Card>
 
           <div className="grid grid-cols-2 gap-4 w-full">
-            <Button variant="outline" className="rounded-2xl h-14 font-bold border-2">Ver Perfil</Button>
-            <Button className="rounded-2xl h-14 font-bold shadow-lg shadow-primary/30">Nuevo Escaneo</Button>
+            <Button variant="outline" className="rounded-2xl h-14 font-bold border-2">Ver Historia</Button>
+            <Button className="rounded-2xl h-14 font-bold shadow-lg shadow-primary/30">Registrar Vitals</Button>
           </div>
         </div>
       </IonContent>

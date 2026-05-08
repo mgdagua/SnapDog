@@ -20,6 +20,9 @@ import {
   medicalOutline,
   personOutline,
   settingsOutline,
+  scanOutline,
+  clipboardOutline,
+  globeOutline,
 } from 'ionicons/icons'
 import { useLocation } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -31,13 +34,15 @@ const menuItems = [
 ]
 
 const toolItems = [
-  { title: 'Biometría', url: '/biometrics', icon: flaskOutline },
-  { title: 'IA Análisis', url: '/analytics', icon: analyticsOutline },
-  { title: 'Panel Clínico', url: '/clinical', icon: medicalOutline },
+  { title: 'Escáner Biométrico', url: '/biometrics', icon: scanOutline },
+  { title: 'Pacientes Activos', url: '/active-patients', icon: clipboardOutline },
+  { title: 'Historial Clínico Global', url: '/clinical-records', icon: medicalOutline },
+  { title: 'Red Interoperable', url: '/network', icon: globeOutline },
 ]
 
 export function SideMenu() {
-  const location = useLocation()
+  const location = useLocation<{ role: string }>()
+  const isVeterinarian = location.state?.role === 'veterinarian'
 
   return (
     <IonMenu contentId="main-content" type="overlay">
@@ -52,7 +57,9 @@ export function SideMenu() {
             </div>
             
             <div className="bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 inline-flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">⚡ Voluntario</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                ⚡ {isVeterinarian ? 'Veterinario' : 'Voluntario'}
+              </span>
             </div>
           </div>
         </IonToolbar>
