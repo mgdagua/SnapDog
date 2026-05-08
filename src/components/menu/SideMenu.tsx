@@ -18,6 +18,7 @@ import {
   scanOutline,
   clipboardOutline,
   folderOpenOutline,
+  logOutOutline,
 } from 'ionicons/icons'
 import { useLocation } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
@@ -110,7 +111,7 @@ export function SideMenu() {
 
       <IonFooter className="ion-no-border">
         <div className="p-4">
-          <div className="bg-card border border-border/40 rounded-[2rem] p-4 flex items-center gap-3 shadow-sm">
+          <div className="bg-card border border-border/40 rounded-[2rem] p-4 flex items-center gap-3 shadow-sm mb-2">
             <Avatar className="h-10 w-10 ring-2 ring-primary/10">
               <AvatarImage src={userAvatar} alt={userName} />
               <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
@@ -127,10 +128,26 @@ export function SideMenu() {
               </IonItem>
             </IonMenuToggle>
           </div>
+          
+          <IonMenuToggle autoHide={false}>
+            <IonItem 
+              routerLink="/" 
+              routerDirection="back" 
+              lines="none" 
+              className="rounded-2xl bg-destructive/5 text-destructive hover:bg-destructive/10 transition-colors mx-0"
+              detail={false}
+              onClick={() => {
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userAvatar');
+              }}
+            >
+              <IonIcon slot="start" icon={logOutOutline} className="text-xl" />
+              <IonLabel className="font-black text-xs uppercase tracking-widest">Cerrar Sesión</IonLabel>
+            </IonItem>
+          </IonMenuToggle>
         </div>
       </IonFooter>
     </IonMenu>
   )
 }
-
-
